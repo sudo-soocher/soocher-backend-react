@@ -6,14 +6,16 @@ import {
   Navigate,
 } from "react-router-dom";
 import { AuthProvider, useAuthContext } from "./context/AuthContext";
-import LoginForm from "./components/auth/LoginForm";
+import { ThemeProvider } from "./context/ThemeContext";
+import LoginForm from "./components/auth/LoginFormShadcn";
 import SignupForm from "./components/auth/SignupForm";
 import Layout from "./components/layout/Layout";
-import Dashboard from "./pages/Dashboard";
-import Doctors from "./pages/Doctors";
-import Patients from "./pages/Patients";
-import Consultations from "./pages/Consultations";
-import ConsultationDetails from "./pages/ConsultationDetails";
+import Dashboard from "./pages/DashboardShadcn";
+import Doctors from "./pages/DoctorsShadcn";
+import Patients from "./pages/PatientsShadcn";
+import Withdrawals from "./pages/Withdrawals";
+import Consultations from "./pages/ConsultationsShadcn";
+import ConsultationDetails from "./pages/ConsultationDetailsShadcn";
 import EditConsultation from "./pages/EditConsultation";
 import UserDetails from "./pages/UserDetails";
 import LoadingSpinner from "./components/common/LoadingSpinner";
@@ -73,8 +75,14 @@ const AppRoutes = () => {
       >
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="doctors" element={<Doctors />} />
+        <Route path="doctors/all" element={<Doctors />} />
+        <Route path="doctors/pending" element={<Doctors />} />
+        <Route path="doctors/verified" element={<Doctors />} />
         <Route path="patients" element={<Patients />} />
-        <Route path="withdrawals" element={<div>Withdrawals Page</div>} />
+        <Route path="patients/all" element={<Patients />} />
+        <Route path="patients/pending" element={<Patients />} />
+        <Route path="patients/verified" element={<Patients />} />
+        <Route path="withdrawals" element={<Withdrawals />} />
         <Route path="consultations" element={<Consultations />} />
         <Route path="consultations/all" element={<Consultations />} />
         <Route path="consultations/active" element={<Consultations />} />
@@ -97,13 +105,15 @@ const AppRoutes = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <div className="App">
-          <AppRoutes />
-        </div>
-      </Router>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <Router>
+          <div className="App">
+            <AppRoutes />
+          </div>
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

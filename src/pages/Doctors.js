@@ -224,32 +224,32 @@ const Doctors = () => {
       const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter(
         (doctor) =>
-          doctor.name?.toLowerCase().includes(searchLower) ||
-          doctor.specialization?.toLowerCase().includes(searchLower) ||
-          doctor.currentCity?.toLowerCase().includes(searchLower) ||
-          doctor.mciNumber?.toLowerCase().includes(searchLower)
+          doctor?.name?.toLowerCase().includes(searchLower) ||
+          doctor?.specialization?.toLowerCase().includes(searchLower) ||
+          doctor?.currentCity?.toLowerCase().includes(searchLower) ||
+          doctor?.mciNumber?.toLowerCase().includes(searchLower)
       );
     }
 
     // Status filter
     if (filterStatus === "verified") {
-      filtered = filtered.filter((doctor) => doctor.isAccountVerified);
+      filtered = filtered.filter((doctor) => doctor?.isAccountVerified);
     } else if (filterStatus === "pending") {
       filtered = filtered.filter(
         (doctor) =>
-          doctor.documentsSubmitted === true &&
-          doctor.isAccountVerified === false
+          doctor?.documentsSubmitted === true &&
+          doctor?.isAccountVerified === false
       );
     } else if (filterStatus === "no-documents") {
       filtered = filtered.filter(
-        (doctor) => doctor.documentsSubmitted !== true
+        (doctor) => doctor?.documentsSubmitted !== true
       );
     }
 
     // Specialty filter
     if (filterSpecialty !== "all") {
       filtered = filtered.filter(
-        (doctor) => doctor.specialization === filterSpecialty
+        (doctor) => doctor?.specialization === filterSpecialty
       );
     }
 
@@ -352,22 +352,23 @@ const Doctors = () => {
   };
 
   const calculateStats = (doctorsList) => {
-    const total = doctorsList.length;
-    const verified = doctorsList.filter(
-      (doctor) => doctor.isAccountVerified
-    ).length;
-    const pending = doctorsList.filter(
-      (doctor) =>
-        doctor.documentsSubmitted === true && doctor.isAccountVerified === false
-    ).length;
-    const noDocuments = doctorsList.filter(
-      (doctor) => doctor.documentsSubmitted !== true
-    ).length;
+    const total = doctorsList?.length || 0;
+    const verified =
+      doctorsList?.filter((doctor) => doctor?.isAccountVerified).length || 0;
+    const pending =
+      doctorsList?.filter(
+        (doctor) =>
+          doctor?.documentsSubmitted === true &&
+          doctor?.isAccountVerified === false
+      ).length || 0;
+    const noDocuments =
+      doctorsList?.filter((doctor) => doctor?.documentsSubmitted !== true)
+        .length || 0;
 
     // Calculate specializations
     const specializations = {};
-    doctorsList.forEach((doctor) => {
-      if (doctor.specialization) {
+    doctorsList?.forEach((doctor) => {
+      if (doctor?.specialization) {
         specializations[doctor.specialization] =
           (specializations[doctor.specialization] || 0) + 1;
       }
@@ -375,8 +376,8 @@ const Doctors = () => {
 
     // Calculate cities
     const cities = {};
-    doctorsList.forEach((doctor) => {
-      if (doctor.currentCity) {
+    doctorsList?.forEach((doctor) => {
+      if (doctor?.currentCity) {
         cities[doctor.currentCity] = (cities[doctor.currentCity] || 0) + 1;
       }
     });
@@ -407,16 +408,16 @@ const Doctors = () => {
   };
 
   const getDisplayName = (doctor) => {
-    const name = doctor.name || "Unknown Doctor";
+    const name = doctor?.name || "Unknown Doctor";
     // Don't add "Dr." prefix for Psychology specialty doctors
-    if (doctor.specialization === "Psychology") {
+    if (doctor?.specialization === "Psychology") {
       return name;
     }
     return `Dr. ${name}`;
   };
 
   const getStatusBadge = (doctor) => {
-    if (doctor.isAccountVerified) {
+    if (doctor?.isAccountVerified) {
       return (
         <span className="status-badge verified">
           <CheckCircle size={12} />
@@ -424,8 +425,8 @@ const Doctors = () => {
         </span>
       );
     } else if (
-      doctor.documentsSubmitted === true &&
-      doctor.isAccountVerified === false
+      doctor?.documentsSubmitted === true &&
+      doctor?.isAccountVerified === false
     ) {
       return (
         <span className="status-badge pending">
@@ -597,21 +598,21 @@ const Doctors = () => {
                     <div className="profile-toggle-container">
                       <button
                         className={`profile-toggle ${
-                          doctor.isAccountVerified ? "enabled" : "disabled"
+                          doctor?.isAccountVerified ? "enabled" : "disabled"
                         }`}
                         onClick={() =>
                           handleProfileToggle(
-                            doctor.uid,
-                            doctor.isAccountVerified || false
+                            doctor?.uid,
+                            doctor?.isAccountVerified || false
                           )
                         }
                         title={
-                          doctor.isAccountVerified
+                          doctor?.isAccountVerified
                             ? "Unverify Profile"
                             : "Verify Profile"
                         }
                       >
-                        {doctor.isAccountVerified ? (
+                        {doctor?.isAccountVerified ? (
                           <ToggleRight size={20} />
                         ) : (
                           <ToggleLeft size={20} />
@@ -625,37 +626,40 @@ const Doctors = () => {
                   <div className="detail-item">
                     <MapPin size={14} />
                     <span>
-                      {doctor.currentCity}, {doctor.currentState}
+                      {doctor?.currentCity || "N/A"},{" "}
+                      {doctor?.currentState || "N/A"}
                     </span>
                   </div>
                   <div className="detail-item">
                     <Phone size={14} />
-                    <span>{doctor.phoneNumber}</span>
+                    <span>{doctor?.phoneNumber || "Not provided"}</span>
                   </div>
                   <div className="detail-item">
                     <Star size={14} />
-                    <span>{doctor.averageRating || 0}/5</span>
+                    <span>{doctor?.averageRating || 0}/5</span>
                   </div>
                   <div className="detail-item">
                     <Calendar size={14} />
-                    <span>Joined {formatDate(doctor.accountCreationDate)}</span>
+                    <span>
+                      Joined {formatDate(doctor?.accountCreationDate)}
+                    </span>
                   </div>
                 </div>
 
                 <div className="doctor-footer">
                   <div className="doctor-stats">
                     <span className="stat">
-                      <strong>{doctor.numOnline || 0}</strong> Online
+                      <strong>{doctor?.numOnline || 0}</strong> Online
                     </span>
                     <span className="stat">
-                      <strong>{doctor.numOffline || 0}</strong> Offline
+                      <strong>{doctor?.numOffline || 0}</strong> Offline
                     </span>
                     <span className="stat">
-                      <strong>₹{doctor.consultationFees || 0}</strong> Fee
+                      <strong>₹{doctor?.consultationFees || 0}</strong> Fee
                     </span>
                   </div>
-                  {doctor.documentsSubmitted === true &&
-                    !doctor.isAccountVerified && (
+                  {doctor?.documentsSubmitted === true &&
+                    !doctor?.isAccountVerified && (
                       <div className="verification-actions">
                         <button
                           className="verify-button"
@@ -745,26 +749,26 @@ const Doctors = () => {
                     <h4>Professional Details</h4>
                     <div className="detail-item">
                       <span className="label">MCI Number:</span>
-                      <span>{selectedDoctor.mciNumber}</span>
+                      <span>{selectedDoctor?.mciNumber || "Not provided"}</span>
                     </div>
                     <div className="detail-item">
                       <span className="label">Experience:</span>
-                      <span>{selectedDoctor.numExp}</span>
+                      <span>{selectedDoctor?.numExp || "Not specified"}</span>
                     </div>
                     <div className="detail-item">
                       <span className="label">Works At:</span>
-                      <span>{selectedDoctor.worksAt || "Not specified"}</span>
+                      <span>{selectedDoctor?.worksAt || "Not specified"}</span>
                     </div>
                     <div className="detail-item">
                       <span className="label">Consultation Fee:</span>
-                      <span>₹{selectedDoctor.consultationFees}</span>
+                      <span>₹{selectedDoctor?.consultationFees || 0}</span>
                     </div>
                   </div>
 
                   <div className="detail-section">
                     <h4>About</h4>
                     <p className="about-text">
-                      {selectedDoctor.aboutMe || "No description provided"}
+                      {selectedDoctor?.aboutMe || "No description provided"}
                     </p>
                   </div>
                 </div>
@@ -826,17 +830,17 @@ const Doctors = () => {
                     <div className="doctor-details">
                       <h3>{getDisplayName(selectedDoctor)}</h3>
                       <p className="specialization">
-                        {selectedDoctor.specialization}
+                        {selectedDoctor?.specialization || "Not specified"}
                       </p>
                       <div className="doctor-meta">
                         <span className="meta-item">
                           <MapPin size={14} />
-                          {selectedDoctor.currentCity},{" "}
-                          {selectedDoctor.currentState}
+                          {selectedDoctor?.currentCity || "N/A"},{" "}
+                          {selectedDoctor?.currentState || "N/A"}
                         </span>
                         <span className="meta-item">
                           <Phone size={14} />
-                          {selectedDoctor.phoneNumber}
+                          {selectedDoctor?.phoneNumber || "Not provided"}
                         </span>
                       </div>
                     </div>
@@ -855,7 +859,7 @@ const Doctors = () => {
                         <div className="document-header">
                           <h5>Aadhar Card - Front</h5>
                           <span className="document-status">
-                            {selectedDoctor.aadharFrontUrl ? (
+                            {selectedDoctor?.aadharFrontUrl ? (
                               <CheckCircle
                                 size={16}
                                 className="status-icon verified"
@@ -868,7 +872,7 @@ const Doctors = () => {
                             )}
                           </span>
                         </div>
-                        {selectedDoctor.aadharFrontUrl ? (
+                        {selectedDoctor?.aadharFrontUrl ? (
                           <div className="document-image-container">
                             <img
                               src={selectedDoctor.aadharFrontUrl}
@@ -898,7 +902,7 @@ const Doctors = () => {
                         <div className="document-header">
                           <h5>Aadhar Card - Back</h5>
                           <span className="document-status">
-                            {selectedDoctor.aadharBackUrl ? (
+                            {selectedDoctor?.aadharBackUrl ? (
                               <CheckCircle
                                 size={16}
                                 className="status-icon verified"
@@ -911,7 +915,7 @@ const Doctors = () => {
                             )}
                           </span>
                         </div>
-                        {selectedDoctor.aadharBackUrl ? (
+                        {selectedDoctor?.aadharBackUrl ? (
                           <div className="document-image-container">
                             <img
                               src={selectedDoctor.aadharBackUrl}
@@ -941,7 +945,7 @@ const Doctors = () => {
                         <div className="document-header">
                           <h5>MCI Certificate</h5>
                           <span className="document-status">
-                            {selectedDoctor.mciUploadUrl ? (
+                            {selectedDoctor?.mciUploadUrl ? (
                               <CheckCircle
                                 size={16}
                                 className="status-icon verified"
@@ -954,7 +958,7 @@ const Doctors = () => {
                             )}
                           </span>
                         </div>
-                        {selectedDoctor.mciUploadUrl ? (
+                        {selectedDoctor?.mciUploadUrl ? (
                           <div className="document-image-container">
                             <img
                               src={selectedDoctor.mciUploadUrl}
@@ -1122,19 +1126,19 @@ const Doctors = () => {
                     <div className="detail-row">
                       <span className="detail-label">Email:</span>
                       <span className="detail-value">
-                        {selectedDoctor.email}
+                        {selectedDoctor?.email || "Not provided"}
                       </span>
                     </div>
                     <div className="detail-row">
                       <span className="detail-label">Phone:</span>
                       <span className="detail-value">
-                        {selectedDoctor.phoneNumber || "Not provided"}
+                        {selectedDoctor?.phoneNumber || "Not provided"}
                       </span>
                     </div>
                     <div className="detail-row">
                       <span className="detail-label">Specialization:</span>
                       <span className="detail-value">
-                        {selectedDoctor.specialization}
+                        {selectedDoctor?.specialization || "Not specified"}
                       </span>
                     </div>
                   </div>
@@ -1144,13 +1148,13 @@ const Doctors = () => {
                     <div className="detail-row">
                       <span className="detail-label">City:</span>
                       <span className="detail-value">
-                        {selectedDoctor.city || "Not provided"}
+                        {selectedDoctor.currentCity || "Not provided"}
                       </span>
                     </div>
                     <div className="detail-row">
                       <span className="detail-label">State:</span>
                       <span className="detail-value">
-                        {selectedDoctor.state || "Not provided"}
+                        {selectedDoctor.currentState || "Not provided"}
                       </span>
                     </div>
                   </div>
@@ -1160,7 +1164,7 @@ const Doctors = () => {
                     <div className="detail-row">
                       <span className="detail-label">Verification:</span>
                       <span className="detail-value">
-                        {selectedDoctor.isAccountVerified
+                        {selectedDoctor?.isAccountVerified
                           ? "Verified"
                           : "Pending"}
                       </span>
@@ -1168,7 +1172,7 @@ const Doctors = () => {
                     <div className="detail-row">
                       <span className="detail-label">Documents:</span>
                       <span className="detail-value">
-                        {selectedDoctor.documentsSubmitted
+                        {selectedDoctor?.documentsSubmitted
                           ? "Submitted"
                           : "Not Submitted"}
                       </span>
@@ -1176,7 +1180,7 @@ const Doctors = () => {
                     <div className="detail-row">
                       <span className="detail-label">Verification Status:</span>
                       <span className="detail-value">
-                        {selectedDoctor.isAccountVerified
+                        {selectedDoctor?.isAccountVerified
                           ? "Verified"
                           : "Unverified"}
                       </span>

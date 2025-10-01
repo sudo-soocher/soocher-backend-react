@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import Sidebar from "./Sidebar";
-import Header from "./Header";
+import Sidebar from "./SidebarShadcn";
+import Header from "./HeaderShadcn";
 import "./Layout.css";
 
 const Layout = () => {
@@ -31,15 +31,15 @@ const Layout = () => {
   };
 
   return (
-    <div className="layout">
+    <div className="min-h-screen bg-gray-50">
       <Sidebar
         isMobile={isMobile}
         isOpen={sidebarOpen}
         onClose={handleSidebarClose}
       />
-      <div className="main-content">
+      <div className="md:pl-80">
         <Header isMobile={isMobile} onMenuClick={handleMenuClick} />
-        <main className="content">
+        <main className="p-6">
           <Outlet />
         </main>
       </div>
