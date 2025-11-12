@@ -14,6 +14,7 @@ import {
   X,
   ChevronRight,
   ChevronDown,
+  CreditCard,
 } from "lucide-react";
 
 // shadcn components
@@ -70,6 +71,12 @@ const SidebarShadcn = ({ isMobile, isOpen, onClose }) => {
         { path: "/consultations/active", label: "Active" },
         { path: "/consultations/completed", label: "Completed" },
       ],
+    },
+    {
+      path: "/transactions",
+      label: "Transaction Viewer",
+      icon: CreditCard,
+      badge: null,
     },
     {
       path: "/reports",

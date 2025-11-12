@@ -207,6 +207,30 @@ export const rejectDoctorVerification = async (doctorId, reason = "") => {
   }
 };
 
+// Toggle doctor verification status
+export const toggleDoctorVerification = async (doctorId, isVerified) => {
+  try {
+    const updateData = {
+      isAccountVerified: isVerified,
+    };
+    
+    if (isVerified) {
+      updateData.documentsSubmitted = true;
+      updateData.verificationDate = new Date();
+      updateData.verificationRejected = false;
+      updateData.rejectionReason = null;
+    } else {
+      updateData.verificationRejected = true;
+      updateData.rejectionDate = new Date();
+    }
+    
+    const result = await updateDocument(usersCollection, doctorId, updateData);
+    return result;
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+
 // Get doctor statistics
 export const getDoctorStats = async () => {
   try {

@@ -27,6 +27,8 @@ import {
   getDoctors,
   getDoctorStats,
   verifyDoctor,
+  toggleDoctorVerification,
+  updateDoctor,
 } from "../services/doctorService";
 import { fetchPhoneNumber, updatePhoneNumber } from "../services/phoneService";
 
@@ -58,6 +60,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../components/ui/dialog";
+import { Switch } from "../components/ui/switch";
 
 // Memoized Doctor Card Component for better performance
 const DoctorCard = memo(
@@ -70,6 +73,8 @@ const DoctorCard = memo(
     getStatusBadge,
     getDisplayName,
     formatDate,
+    onToggleVerification,
+    togglingVerification,
   }) => {
     return (
       <motion.div
@@ -165,7 +170,18 @@ const DoctorCard = memo(
                     Fees: ₹{doctor?.consultationFees || "N/A"}
                   </span>
                 </div>
-                <div className="flex space-x-2">
+                <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs text-gray-500">Verified</span>
+                    <Switch
+                      checked={doctor?.isAccountVerified || false}
+                      onCheckedChange={(checked) => {
+                        onToggleVerification(doctor, checked);
+                      }}
+                      disabled={togglingVerification[doctor.uid]}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
                   <Button
                     size="sm"
                     variant="outline"
@@ -213,7 +229,6 @@ const DoctorsShadcn = memo(() => {
   const [selectedImageTitle, setSelectedImageTitle] = useState("");
   const [specialties, setSpecialties] = useState([]);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
-  const [profileStates, setProfileStates] = useState({});
   const [fetchingPhoneNumbers, setFetchingPhoneNumbers] = useState({});
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingDoctor, setEditingDoctor] = useState(null);
@@ -221,6 +236,7 @@ const DoctorsShadcn = memo(() => {
   const [editLoading, setEditLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(12); // Show 12 doctors per page
+  const [togglingVerification, setTogglingVerification] = useState({});
 
   const loadDoctors = useCallback(async () => {
     setLoading(true);
@@ -578,27 +594,62 @@ const DoctorsShadcn = memo(() => {
     setShowDetailsDialog(true);
   };
 
-  const handleProfileToggle = async (doctorId, currentState) => {
-    const newState = !currentState;
+  const handleToggleVerification = async (doctor, isVerified) => {
+    const doctorId = doctor.uid;
 
-    // Update the doctor's isAccountVerified status in the doctors array
-    setDoctors((prevDoctors) =>
-      prevDoctors.map((doctor) =>
-        doctor.uid === doctorId
-          ? { ...doctor, isAccountVerified: newState }
-          : doctor
-      )
-    );
+    // Set loading state for this specific doctor
+    setTogglingVerification((prev) => ({ ...prev, [doctorId]: true }));
 
-    // Also update the profileStates for UI consistency
-    setProfileStates((prev) => ({
-      ...prev,
-      [doctorId]: newState,
-    }));
+    try {
+      const result = await toggleDoctorVerification(doctorId, isVerified);
 
-    // Here you would typically make an API call to update the profile status
-    // For now, we'll just update the local state
-    console.log(`Profile ${doctorId} ${newState ? "verified" : "unverified"}`);
+      if (result.success) {
+        // Update the doctor in the local state
+        setDoctors((prevDoctors) =>
+          prevDoctors.map((d) =>
+            d.uid === doctorId ? { ...d, isAccountVerified: isVerified } : d
+          )
+        );
+
+        // Update stats if available
+        if (stats) {
+          const newStats = { ...stats };
+          if (isVerified) {
+            newStats.verified = (newStats.verified || 0) + 1;
+            newStats.pending = Math.max((newStats.pending || 0) - 1, 0);
+          } else {
+            newStats.verified = Math.max((newStats.verified || 0) - 1, 0);
+            newStats.pending = (newStats.pending || 0) + 1;
+          }
+          setStats(newStats);
+        }
+
+        console.log(
+          `Doctor ${doctorId} ${
+            isVerified ? "verified" : "unverified"
+          } successfully`
+        );
+      } else {
+        console.error("Error toggling verification:", result.error);
+        alert(
+          `Error ${isVerified ? "verifying" : "unverifying"} doctor: ${
+            result.error
+          }`
+        );
+        // Revert the switch state on error
+      }
+    } catch (error) {
+      console.error("Error toggling verification:", error);
+      alert(
+        `Failed to ${isVerified ? "verify" : "unverify"} doctor: ${
+          error.message
+        }`
+      );
+      // Revert the switch state on error
+    } finally {
+      // Clear loading state
+      setTogglingVerification((prev) => ({ ...prev, [doctorId]: false }));
+    }
   };
 
   const handleFetchPhoneNumber = async (doctor) => {
@@ -652,6 +703,7 @@ const DoctorsShadcn = memo(() => {
       currentState: doctor.currentState || "",
       worksAt: doctor.worksAt || "",
       mciNumber: doctor.mciNumber || "",
+      numExp: doctor.numExp || "",
       consultationFees: doctor.consultationFees || "",
       aboutMe: doctor.aboutMe || "",
       averageRating: doctor.averageRating || 0,
@@ -666,22 +718,33 @@ const DoctorsShadcn = memo(() => {
 
     setEditLoading(true);
     try {
-      // Here you would typically make an API call to update the doctor
-      // For now, we'll update the local state
-      setDoctors((prevDoctors) =>
-        prevDoctors.map((d) =>
-          d.uid === editingDoctor.uid ? { ...d, ...editFormData } : d
-        )
-      );
+      // Call the API to update the doctor in Firebase
+      const result = await updateDoctor(editingDoctor.uid, editFormData);
 
-      console.log("Doctor updated:", editingDoctor.uid, editFormData);
-      alert("Doctor information updated successfully!");
-      setShowEditDialog(false);
-      setEditingDoctor(null);
-      setEditFormData({});
+      if (result.success) {
+        // Update the local state after successful save
+        setDoctors((prevDoctors) =>
+          prevDoctors.map((d) =>
+            d.uid === editingDoctor.uid ? { ...d, ...editFormData } : d
+          )
+        );
+
+        console.log(
+          "Doctor updated successfully:",
+          editingDoctor.uid,
+          editFormData
+        );
+        alert("Doctor information updated successfully!");
+        setShowEditDialog(false);
+        setEditingDoctor(null);
+        setEditFormData({});
+      } else {
+        console.error("Error updating doctor:", result.error);
+        alert(`Failed to update doctor information: ${result.error}`);
+      }
     } catch (error) {
       console.error("Error updating doctor:", error);
-      alert("Failed to update doctor information. Please try again.");
+      alert(`Failed to update doctor information: ${error.message}`);
     } finally {
       setEditLoading(false);
     }
@@ -984,6 +1047,8 @@ const DoctorsShadcn = memo(() => {
                   getStatusBadge={getStatusBadge}
                   getDisplayName={getDisplayName}
                   formatDate={formatDate}
+                  onToggleVerification={handleToggleVerification}
+                  togglingVerification={togglingVerification}
                 />
               ))}
             </div>
@@ -1203,6 +1268,12 @@ const DoctorsShadcn = memo(() => {
                         <span className="font-medium">MCI Number:</span>
                         <span className="ml-2">
                           {selectedDoctor?.mciNumber || "Not provided"}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-medium">Experience:</span>
+                        <span className="ml-2">
+                          {selectedDoctor?.numExp || "Not provided"}
                         </span>
                       </div>
                       <div>
@@ -1672,6 +1743,19 @@ const DoctorsShadcn = memo(() => {
                         })
                       }
                       placeholder="Medical Council registration number"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Experience</label>
+                    <Input
+                      value={editFormData.numExp}
+                      onChange={(e) =>
+                        setEditFormData({
+                          ...editFormData,
+                          numExp: e.target.value,
+                        })
+                      }
+                      placeholder="Years of experience (e.g., 5 years)"
                     />
                   </div>
                   <div className="space-y-2">

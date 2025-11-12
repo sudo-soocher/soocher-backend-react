@@ -157,25 +157,36 @@ class ConsultationService {
       }
 
       // Prepare update data with timestamp
+      // Filter out undefined values as Firestore doesn't allow them
+      const filteredUpdateData = Object.fromEntries(
+        Object.entries(updateData).filter(([_, value]) => value !== undefined)
+      );
+      
       const updatePayload = {
-        ...updateData,
+        ...filteredUpdateData,
         lastModified: new Date().getTime(),
       };
 
       // If consultation time is being updated, also update expiration time
+      // Use 55 minutes for Psychology doctors, 15 minutes for others
       if (updateData.consultationTime) {
         const consultationTime = updateData.consultationTime;
-
+        const currentData = consultationSnap.data();
+        
         // Determine expiration time based on doctor specialization
-        let expirationMinutes = 15; // Default for most doctors
+        let expirationMinutes = 15; // Default: 15 minutes for most doctors
 
-        // Check if doctor details include specialization
+        // Check if doctor details include psychology specialization
         if (updateData.doctorDetails && updateData.doctorDetails.specialty) {
           const specialty = updateData.doctorDetails.specialty.toLowerCase();
           if (specialty.includes("psychology")) {
             expirationMinutes = 55; // 55 minutes for Psychology doctors
-          } else {
-            expirationMinutes = 15; // 15 minutes for other doctors
+          }
+        } else if (currentData.doctorDetails && currentData.doctorDetails.specialty) {
+          // Fallback: check current doctor's specialization
+          const specialty = currentData.doctorDetails.specialty.toLowerCase();
+          if (specialty.includes("psychology")) {
+            expirationMinutes = 55;
           }
         } else if (updateData.doctorName) {
           // Fallback: check if doctor name suggests psychology (less reliable)
@@ -185,16 +196,24 @@ class ConsultationService {
             doctorName.includes("psychologist")
           ) {
             expirationMinutes = 55;
-          } else {
-            expirationMinutes = 15;
+          }
+        } else if (currentData.doctorName) {
+          // Fallback: check current doctor name
+          const doctorName = currentData.doctorName.toLowerCase();
+          if (
+            doctorName.includes("psychology") ||
+            doctorName.includes("psychologist")
+          ) {
+            expirationMinutes = 55;
           }
         }
 
+        // consultationExpiration = consultationTime + expirationMinutes (in milliseconds)
         const expirationTime = consultationTime + expirationMinutes * 60 * 1000;
         updatePayload.consultationExpiration = expirationTime;
 
-        // Set chat expiration to consultation expiration + 7 days
-        const chatExpirationTime = expirationTime + 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+        // chatExpiration = consultationExpiration + 7 days (in milliseconds)
+        const chatExpirationTime = expirationTime + 7 * 24 * 60 * 60 * 1000;
         updatePayload.chatExpiration = chatExpirationTime;
       }
 
@@ -213,43 +232,19 @@ class ConsultationService {
 
         updatePayload.participants = currentParticipants;
         updatePayload.doctorName = updateData.doctorName;
-        updatePayload.doctorDetails =
-          updateData.doctorDetails || currentData.doctorDetails;
-
-        // If consultation time exists and doctor is being changed, recalculate expiration
-        if (currentData.consultationTime) {
-          const consultationTime = currentData.consultationTime;
-
-          // Determine expiration time based on new doctor's specialization
-          let expirationMinutes = 15; // Default for most doctors
-
-          if (updateData.doctorDetails && updateData.doctorDetails.specialty) {
-            const specialty = updateData.doctorDetails.specialty.toLowerCase();
-            if (specialty.includes("psychology")) {
-              expirationMinutes = 55; // 55 minutes for Psychology doctors
-            }
-          } else if (updateData.doctorName) {
-            // Fallback: check if doctor name suggests psychology
-            const doctorName = updateData.doctorName.toLowerCase();
-            if (
-              doctorName.includes("psychology") ||
-              doctorName.includes("psychologist")
-            ) {
-              expirationMinutes = 55;
-            }
-          }
-
-          const expirationTime =
-            consultationTime + expirationMinutes * 60 * 1000;
-          updatePayload.consultationExpiration = expirationTime;
-
-          // Set chat expiration to consultation expiration + 7 days
-          const chatExpirationTime = expirationTime + 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
-          updatePayload.chatExpiration = chatExpirationTime;
+        // Only set doctorDetails if it exists and is not null/undefined
+        const doctorDetails = updateData.doctorDetails || currentData.doctorDetails;
+        if (doctorDetails !== null && doctorDetails !== undefined) {
+          updatePayload.doctorDetails = doctorDetails;
         }
       }
 
-      await updateDoc(consultationRef, updatePayload);
+      // Final filter to remove any undefined values that might have been added
+      const finalUpdatePayload = Object.fromEntries(
+        Object.entries(updatePayload).filter(([_, value]) => value !== undefined)
+      );
+
+      await updateDoc(consultationRef, finalUpdatePayload);
 
       // Return updated consultation
       const updatedSnap = await getDoc(consultationRef);
