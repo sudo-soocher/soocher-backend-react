@@ -4,6 +4,7 @@ import {
   getDocs,
   getDoc,
   addDoc,
+  setDoc,
   updateDoc,
   deleteDoc,
   query,
@@ -26,6 +27,21 @@ export const createDocument = async (collectionName, data) => {
       updatedAt: new Date(),
     });
     return { success: true, id: docRef.id };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+
+// Create document with specific ID
+export const createDocumentWithId = async (collectionName, docId, data) => {
+  try {
+    const docRef = doc(db, collectionName, docId);
+    await setDoc(docRef, {
+      ...data,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    return { success: true, id: docId };
   } catch (error) {
     return { success: false, error: error.message };
   }
@@ -153,3 +169,4 @@ export const withdrawalRequestsCollection = "withdrawalRequests";
 export const verificationsCollection = "verifications";
 export const consultationsCollection = "Consultations";
 export const reportsCollection = "reports";
+export const couponsCollection = "coupons";

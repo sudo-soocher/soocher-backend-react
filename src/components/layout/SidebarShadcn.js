@@ -15,6 +15,7 @@ import {
   ChevronRight,
   ChevronDown,
   CreditCard,
+  Ticket,
 } from "lucide-react";
 
 // shadcn components
@@ -76,6 +77,12 @@ const SidebarShadcn = ({ isMobile, isOpen, onClose }) => {
       path: "/transactions",
       label: "Transaction Viewer",
       icon: CreditCard,
+      badge: null,
+    },
+    {
+      path: "/coupons",
+      label: "Coupons Manager",
+      icon: Ticket,
       badge: null,
     },
     {

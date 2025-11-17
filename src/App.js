@@ -19,6 +19,7 @@ import ConsultationDetails from "./pages/ConsultationDetailsShadcn";
 import EditConsultation from "./pages/EditConsultation";
 import UserDetails from "./pages/UserDetails";
 import TransactionViewer from "./pages/TransactionViewer";
+import CouponsShadcn from "./pages/CouponsShadcn";
 import LoadingSpinner from "./components/common/LoadingSpinner";
 import "./App.css";
 
@@ -98,6 +99,7 @@ const AppRoutes = () => {
         />
         <Route path="users/:userId" element={<UserDetails />} />
         <Route path="transactions" element={<TransactionViewer />} />
+        <Route path="coupons" element={<CouponsShadcn />} />
         <Route path="reports" element={<div>Reports Page</div>} />
         <Route path="" element={<Navigate to="/dashboard" replace />} />
       </Route>
