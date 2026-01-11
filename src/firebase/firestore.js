@@ -170,3 +170,4 @@ export const verificationsCollection = "verifications";
 export const consultationsCollection = "Consultations";
 export const reportsCollection = "reports";
 export const couponsCollection = "coupons";
+export const notificationsCollection = "notifications";

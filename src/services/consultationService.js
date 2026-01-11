@@ -11,6 +11,7 @@ import {
   doc,
   getDoc,
   updateDoc,
+  addDoc,
 } from "firebase/firestore";
 
 class ConsultationService {
@@ -397,6 +398,71 @@ class ConsultationService {
       };
     } catch (error) {
       console.error("Error fetching consultations by date:", error);
+      throw error;
+    }
+  }
+
+  // Create a new consultation
+  async createConsultation(consultationData) {
+    try {
+      const {
+        patientId,
+        patientName,
+        doctorId,
+        doctorName,
+        doctorDetails,
+        consultationTime,
+      } = consultationData;
+
+      // Validate required fields
+      if (!patientId || !doctorId || !consultationTime) {
+        throw new Error("Patient ID, Doctor ID, and Consultation Time are required");
+      }
+
+      // Calculate expiration times
+      // Use 55 minutes for Psychology doctors, 15 minutes for others
+      let expirationMinutes = 15; // Default: 15 minutes for most doctors
+
+      if (doctorDetails && doctorDetails.specialty) {
+        const specialty = doctorDetails.specialty.toLowerCase();
+        if (specialty.includes("psychology")) {
+          expirationMinutes = 55; // 55 minutes for Psychology doctors
+        }
+      }
+
+      const consultationTimeMillis = consultationTime.getTime();
+      const consultationExpiration = consultationTimeMillis + expirationMinutes * 60 * 1000;
+      const chatExpiration = consultationExpiration + 7 * 24 * 60 * 60 * 1000; // 7 days after consultation expiration
+
+      // Create consultation document
+      const consultationRef = collection(db, this.collectionName);
+      const newConsultation = {
+        participants: [patientId, doctorId],
+        consultationTime: consultationTimeMillis,
+        consultationExpiration: consultationExpiration,
+        chatExpiration: chatExpiration,
+        doctorId: doctorId,
+        doctorName: doctorName || "",
+        doctorDetails: doctorDetails || null,
+        patientName: patientName || null,
+        videoConsultDone: false,
+        cancelledByDoctor: false,
+        doctorInRoom: false,
+        patientInRoom: false,
+        createdAt: new Date().getTime(),
+        lastModified: new Date().getTime(),
+      };
+
+      const docRef = await addDoc(consultationRef, newConsultation);
+
+      // Return created consultation
+      const createdDoc = await getDoc(doc(db, this.collectionName, docRef.id));
+      return {
+        id: createdDoc.id,
+        ...createdDoc.data(),
+      };
+    } catch (error) {
+      console.error("Error creating consultation:", error);
       throw error;
     }
   }

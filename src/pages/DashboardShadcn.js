@@ -19,6 +19,7 @@ import {
   AlertCircle,
   BarChart3,
   PieChart as PieChartIcon,
+  CalendarPlus,
 } from "lucide-react";
 import {
   ChartContainer,
@@ -43,6 +44,7 @@ import {
 } from "recharts";
 import { getDoctorStats } from "../services/doctorService";
 import { getPatientStats } from "../services/patientService";
+import ManualBookingDialog from "../components/consultations/ManualBookingDialog";
 
 // shadcn components
 import { Button } from "../components/ui/button";
@@ -82,6 +84,7 @@ const DashboardShadcn = memo(() => {
   const [doctorStats, setDoctorStats] = useState(null);
   const [patientStats, setPatientStats] = useState(null);
   const [timeRange, setTimeRange] = useState("6months");
+  const [showManualBookingDialog, setShowManualBookingDialog] = useState(false);
 
   // Load real data from Firestore
   const loadDashboardData = useCallback(async () => {
@@ -641,6 +644,14 @@ const DashboardShadcn = memo(() => {
                 <CardDescription>Common administrative tasks</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
+                <Button
+                  className="w-full justify-start"
+                  variant="outline"
+                  onClick={() => setShowManualBookingDialog(true)}
+                >
+                  <CalendarPlus className="h-4 w-4 mr-2" />
+                  Add Manual Booking
+                </Button>
                 <Button className="w-full justify-start" variant="outline">
                   <UserCheck className="h-4 w-4 mr-2" />
                   Verify Doctor
@@ -665,6 +676,16 @@ const DashboardShadcn = memo(() => {
             </Card>
           </motion.div>
         </div>
+
+        {/* Manual Booking Dialog */}
+        <ManualBookingDialog
+          open={showManualBookingDialog}
+          onOpenChange={setShowManualBookingDialog}
+          onSuccess={() => {
+            // Optionally reload dashboard data or show success message
+            console.log("Manual booking created successfully");
+          }}
+        />
       </div>
     </div>
   );

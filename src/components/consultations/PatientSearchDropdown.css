@@ -1,5 +1,5 @@
-/* Doctor Search Dropdown Styles */
-.doctor-search-dropdown {
+/* Patient Search Dropdown Styles */
+.patient-search-dropdown {
   position: relative;
   width: 100%;
 }
@@ -47,36 +47,36 @@
   gap: 12px;
 }
 
-.selected-doctor {
+.selected-patient {
   display: flex;
   align-items: center;
   gap: 12px;
   width: 100%;
 }
 
-.doctor-avatar {
+.patient-avatar {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
   overflow: hidden;
   position: relative;
 }
 
-.doctor-profile-image {
+.patient-profile-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   border-radius: 50%;
 }
 
-.doctor-item .doctor-avatar-fallback {
+.patient-item .patient-avatar-fallback {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -84,7 +84,7 @@
   height: 16px;
 }
 
-.doctor-info {
+.patient-info {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -92,13 +92,13 @@
   flex: 1;
 }
 
-.doctor-name-row {
+.patient-name-row {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.doctor-name {
+.patient-name {
   font-weight: 600;
   color: #111827;
   white-space: nowrap;
@@ -107,31 +107,10 @@
   font-size: 14px;
 }
 
-.verified-badge-small {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-  color: #166534;
-  border-radius: 50%;
-  flex-shrink: 0;
-  box-shadow: 0 1px 3px rgba(34, 197, 94, 0.2);
-}
-
-.doctor-specialty {
+.patient-contact {
   font-size: 13px;
   color: #4b5563;
   font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.doctor-location {
-  font-size: 12px;
-  color: #6b7280;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -226,7 +205,7 @@
   width: 16px;
   height: 16px;
   border: 2px solid #e5e7eb;
-  border-top: 2px solid #3b82f6;
+  border-top: 2px solid #10b981;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -266,14 +245,14 @@
   color: #9ca3af;
 }
 
-/* Doctor List */
-.doctor-list {
+/* Patient List */
+.patient-list {
   max-height: 280px;
   overflow-y: auto;
   padding: 4px 0;
 }
 
-.doctor-item {
+.patient-item {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -285,68 +264,68 @@
   border-bottom: 1px solid #f1f5f9;
 }
 
-.doctor-item:last-child {
+.patient-item:last-child {
   border-bottom: none;
 }
 
-.doctor-item:hover {
+.patient-item:hover {
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   transform: translateX(2px);
 }
 
-.doctor-item.highlighted {
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border-left-color: #3b82f6;
+.patient-item.highlighted {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border-left-color: #10b981;
   transform: translateX(4px);
 }
 
-.doctor-item.selected {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  border-left-color: #0ea5e9;
+.patient-item.selected {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border-left-color: #059669;
   transform: translateX(4px);
 }
 
-.doctor-item.selected .doctor-name {
-  color: #0ea5e9;
+.patient-item.selected .patient-name {
+  color: #059669;
   font-weight: 700;
 }
 
-.doctor-item .doctor-avatar {
+.patient-item .patient-avatar {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
   overflow: hidden;
   position: relative;
 }
 
-.doctor-details {
+.patient-details {
   flex: 1;
   min-width: 0;
 }
 
-.doctor-item .doctor-header {
+.patient-item .patient-header {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 3px;
 }
 
-.doctor-item .doctor-name-container {
+.patient-name-container {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex: 1;
   min-width: 0;
 }
 
-.doctor-item .doctor-name {
+.patient-item .patient-name {
   font-weight: 600;
   color: #111827;
   font-size: 13px;
@@ -356,56 +335,28 @@
   text-overflow: ellipsis;
 }
 
-.doctor-item .verified-badge {
+.patient-meta {
   display: flex;
-  align-items: center;
-  gap: 3px;
-  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-  color: #166534;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 9px;
-  font-weight: 600;
-  box-shadow: 0 1px 2px rgba(34, 197, 94, 0.2);
-  flex-shrink: 0;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
 }
 
-.doctor-item .verified-badge svg {
-  width: 8px;
-  height: 8px;
-}
-
-.rating-badge {
+.patient-item .patient-contact-item {
   display: flex;
   align-items: center;
   gap: 4px;
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  color: #92400e;
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  box-shadow: 0 1px 3px rgba(245, 158, 11, 0.2);
-  flex-shrink: 0;
-}
-
-.doctor-item .doctor-specialty {
-  display: flex;
-  align-items: center;
-  gap: 6px;
   color: #6b7280;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 11px;
 }
 
-.doctor-item .doctor-specialty svg {
+.patient-item .patient-contact-item svg {
   width: 12px;
   height: 12px;
   flex-shrink: 0;
 }
 
-
-.doctor-item .doctor-actions {
+.patient-item .patient-actions {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -414,38 +365,38 @@
   flex-shrink: 0;
 }
 
-.doctor-item .selected-indicator {
-  color: #0ea5e9;
-  background: #e0f2fe;
+.patient-item .selected-indicator {
+  color: #059669;
+  background: #d1fae5;
   border-radius: 50%;
   width: 20px;
   height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 4px rgba(14, 165, 233, 0.3);
+  box-shadow: 0 1px 4px rgba(5, 150, 105, 0.3);
 }
 
-.doctor-item .selected-indicator svg {
+.patient-item .selected-indicator svg {
   width: 12px;
   height: 12px;
 }
 
 /* Scrollbar Styling */
-.doctor-list::-webkit-scrollbar {
+.patient-list::-webkit-scrollbar {
   width: 6px;
 }
 
-.doctor-list::-webkit-scrollbar-track {
+.patient-list::-webkit-scrollbar-track {
   background: #f1f5f9;
 }
 
-.doctor-list::-webkit-scrollbar-thumb {
+.patient-list::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 3px;
 }
 
-.doctor-list::-webkit-scrollbar-thumb:hover {
+.patient-list::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
 
@@ -460,25 +411,26 @@
     padding: 16px;
   }
   
-  .doctor-item {
+  .patient-item {
     padding: 14px 16px;
     gap: 12px;
   }
   
-  .doctor-avatar {
+  .patient-avatar {
     width: 36px;
     height: 36px;
   }
   
-  .doctor-name {
+  .patient-name {
     font-size: 14px;
   }
   
-  .doctor-specialty {
+  .patient-contact-item {
     font-size: 12px;
   }
   
-  .doctor-header {
+  .patient-header {
     gap: 6px;
   }
 }
+
