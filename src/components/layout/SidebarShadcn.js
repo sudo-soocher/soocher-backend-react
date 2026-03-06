@@ -10,291 +10,247 @@ import {
   BarChart3,
   Settings,
   LogOut,
-  Menu,
   X,
   ChevronRight,
-  ChevronDown,
   CreditCard,
   Ticket,
   Bell,
   CalendarPlus,
+  Stethoscope,
+  ShieldCheck,
+  List,
+  Clock,
+  CheckCircle,
+  Play,
+  Video,
+  UserX,
+  Activity,
 } from "lucide-react";
 import ManualBookingDialog from "../consultations/ManualBookingDialog";
-
-// shadcn components
-import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
 import { cn } from "../../lib/utils";
+
+const menuItems = [
+  { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard, iconColor: "#3b82f6", bgColor: "#dbeafe" },
+  {
+    path: "/doctors", label: "Doctors", icon: Stethoscope, iconColor: "#0ea5e9", bgColor: "#e0f2fe",
+    badge: "12",
+    submenu: [
+      { path: "/doctors/all", label: "All Doctors", icon: List },
+      { path: "/doctors/pending", label: "Pending Verification", icon: Clock },
+      { path: "/doctors/verified", label: "Verified", icon: CheckCircle },
+    ],
+  },
+  {
+    path: "/patients", label: "Patients", icon: Users, iconColor: "#6366f1", bgColor: "#e0e7ff",
+    badge: "1.2k",
+    submenu: [
+      { path: "/patients/all", label: "All Patients", icon: List },
+      { path: "/patients/verified", label: "Healthy (80+)", icon: Activity },
+      { path: "/patients/pending", label: "Needs Attention", icon: UserX },
+    ],
+  },
+  { path: "/withdrawals", label: "Withdrawals", icon: DollarSign, iconColor: "#10b981", bgColor: "#d1fae5", badge: "5" },
+  {
+    path: "/consultations", label: "Consultations", icon: MessageSquare, iconColor: "#f59e0b", bgColor: "#fef3c7",
+    badge: "24",
+    submenu: [
+      { path: "/consultations/all", label: "All Consultations", icon: List },
+      { path: "/consultations/active", label: "Active", icon: Play },
+      { path: "/consultations/completed", label: "Completed", icon: CheckCircle },
+      { path: null, label: "Create Booking", isAction: true, icon: CalendarPlus },
+    ],
+  },
+  { path: "/transactions", label: "Transactions", icon: CreditCard, iconColor: "#8b5cf6", bgColor: "#ede9fe" },
+  { path: "/coupons", label: "Coupons Manager", icon: Ticket, iconColor: "#ec4899", bgColor: "#fce7f3" },
+  { path: "/notifications", label: "Notifications", icon: Bell, iconColor: "#06b6d4", bgColor: "#cffafe" },
+  { path: "/reports", label: "Reports", icon: BarChart3, iconColor: "#f97316", bgColor: "#ffedd5" },
+];
 
 const SidebarShadcn = ({ isMobile, isOpen, onClose }) => {
   const location = useLocation();
   const [expandedItems, setExpandedItems] = useState({});
   const [showManualBookingDialog, setShowManualBookingDialog] = useState(false);
 
-  const menuItems = [
-    {
-      path: "/dashboard",
-      label: "Dashboard",
-      icon: LayoutDashboard,
-      badge: null,
-    },
-    {
-      path: "/doctors",
-      label: "Doctors",
-      icon: UserCheck,
-      badge: "12",
-      submenu: [
-        { path: "/doctors/all", label: "All Doctors" },
-        { path: "/doctors/pending", label: "Pending Verification" },
-        { path: "/doctors/verified", label: "Verified" },
-      ],
-    },
-    {
-      path: "/patients",
-      label: "Patients",
-      icon: Users,
-      badge: "1.2k",
-      submenu: [
-        { path: "/patients/all", label: "All Patients" },
-        { path: "/patients/verified", label: "Healthy (80+)" },
-        { path: "/patients/pending", label: "Needs Attention" },
-      ],
-    },
-    {
-      path: "/withdrawals",
-      label: "Withdrawals",
-      icon: DollarSign,
-      badge: "5",
-    },
-    {
-      path: "/consultations",
-      label: "Consultations",
-      icon: MessageSquare,
-      badge: "24",
-      submenu: [
-        { path: "/consultations/all", label: "All Consultations" },
-        { path: "/consultations/active", label: "Active" },
-        { path: "/consultations/completed", label: "Completed" },
-        { path: null, label: "Create Booking", isAction: true, icon: CalendarPlus },
-      ],
-    },
-    {
-      path: "/transactions",
-      label: "Transaction Viewer",
-      icon: CreditCard,
-      badge: null,
-    },
-    {
-      path: "/coupons",
-      label: "Coupons Manager",
-      icon: Ticket,
-      badge: null,
-    },
-    {
-      path: "/notifications",
-      label: "Notifications",
-      icon: Bell,
-      badge: null,
-    },
-    {
-      path: "/reports",
-      label: "Reports",
-      icon: BarChart3,
-      badge: null,
-    },
-  ];
+  const toggleExpanded = (path) =>
+    setExpandedItems((prev) => ({ ...prev, [path]: !prev[path] }));
 
-  const toggleExpanded = (path) => {
-    setExpandedItems((prev) => ({
-      ...prev,
-      [path]: !prev[path],
-    }));
-  };
+  const isActive = (path) =>
+    location.pathname === path || location.pathname.startsWith(path + "/");
 
-  const isActive = (path) => {
-    return (
-      location.pathname === path || location.pathname.startsWith(path + "/")
-    );
-  };
-
-  const isSubmenuActive = (submenu) => {
-    return submenu.some((item) => location.pathname === item.path);
-  };
+  const isSubmenuActive = (submenu) =>
+    submenu.some((item) => location.pathname === item.path);
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-white border-r border-gray-200 overflow-y-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b border-gray-200">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">S</span>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "white", borderRight: "1px solid hsl(213,30%,92%)", overflowY: "auto" }}>
+
+      {/* Logo Header */}
+      <div style={{ padding: "20px 16px 16px", borderBottom: "1px solid hsl(213,30%,93%)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
+            <div style={{
+              width: 38, height: 38,
+              background: "linear-gradient(135deg, #3b82f6, #6366f1)",
+              borderRadius: 11,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: "0 4px 12px rgba(59,130,246,0.35)",
+            }}>
+              <Stethoscope size={18} color="white" />
+            </div>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: "#1e3a5f", letterSpacing: "-0.2px" }}>Soocher</div>
+              <div style={{ fontSize: 10.5, fontWeight: 500, color: "#94a3b8", letterSpacing: "0.5px", textTransform: "uppercase" }}>Admin Panel</div>
+            </div>
           </div>
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">Soocher</h2>
-            <p className="text-xs text-gray-500">Admin Panel</p>
-          </div>
+          {isMobile && (
+            <button onClick={onClose} style={{ background: "hsl(213,40%,95%)", border: "none", borderRadius: 8, width: 30, height: 30, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <X size={15} color="#64748b" />
+            </button>
+          )}
         </div>
-        {isMobile && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="h-8 w-8"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        )}
+
+        {/* Admin badge */}
+        <div style={{ marginTop: 14, padding: "8px 10px", background: "linear-gradient(135deg, #eff6ff, #e0e7ff)", borderRadius: 10, border: "1px solid #bfdbfe", display: "flex", alignItems: "center", gap: 8 }}>
+          <ShieldCheck size={14} color="#3b82f6" />
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "#1e40af" }}>System Administrator</div>
+            <div style={{ fontSize: 10, color: "#64748b" }}>Full access</div>
+          </div>
+          <div style={{ marginLeft: "auto", width: 7, height: 7, background: "#22c55e", borderRadius: "50%", boxShadow: "0 0 0 2px #dcfce7" }} />
+        </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          const hasSubmenu = item.submenu && item.submenu.length > 0;
-          const isExpanded = expandedItems[item.path];
-          const isItemActive =
-            isActive(item.path) ||
-            (hasSubmenu && isSubmenuActive(item.submenu));
+      <nav style={{ flex: 1, padding: "12px 12px", overflowY: "auto" }}>
+        <div style={{ fontSize: 10, fontWeight: 600, color: "#94a3b8", letterSpacing: "0.8px", textTransform: "uppercase", marginBottom: 8, paddingLeft: 4 }}>
+          Navigation
+        </div>
 
-          return (
-            <div key={item.path}>
-              {hasSubmenu ? (
-                <div
-                  className={cn(
-                    "flex items-center justify-between p-3 rounded-lg text-sm font-medium transition-colors cursor-pointer group",
-                    isItemActive
-                      ? "bg-blue-50 text-blue-700 border border-blue-200"
-                      : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
-                  )}
-                  onClick={() => {
-                    toggleExpanded(item.path);
-                  }}
-                >
-                  <div className="flex items-center space-x-3">
-                    <Icon className="h-5 w-5" />
-                    <span>{item.label}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
+        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const hasSubmenu = item.submenu && item.submenu.length > 0;
+            const isExpanded = expandedItems[item.path];
+            const isItemActive = isActive(item.path) || (hasSubmenu && isSubmenuActive(item.submenu));
+
+            return (
+              <div key={item.path}>
+                {hasSubmenu ? (
+                  <div
+                    className={cn("nav-item", isItemActive && "active")}
+                    onClick={() => toggleExpanded(item.path)}
+                  >
+                    <div className="nav-icon-wrap" style={isItemActive ? { background: item.bgColor } : {}}>
+                      <Icon size={15} style={{ color: isItemActive ? item.iconColor : "#64748b" }} />
+                    </div>
+                    <span style={{ flex: 1 }}>{item.label}</span>
                     {item.badge && (
-                      <Badge
-                        variant="secondary"
-                        className="text-xs bg-gray-100 text-gray-600"
-                      >
+                      <span style={{ fontSize: 10, fontWeight: 600, background: isItemActive ? item.bgColor : "#f1f5f9", color: isItemActive ? item.iconColor : "#64748b", padding: "2px 7px", borderRadius: 20, border: `1px solid ${isItemActive ? item.bgColor : "transparent"}` }}>
                         {item.badge}
-                      </Badge>
+                      </span>
                     )}
-                    <motion.div
-                      animate={{ rotate: isExpanded ? 90 : 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <ChevronRight className="h-4 w-4" />
+                    <motion.div animate={{ rotate: isExpanded ? 90 : 0 }} transition={{ duration: 0.18 }}>
+                      <ChevronRight size={13} style={{ color: "#94a3b8" }} />
                     </motion.div>
                   </div>
-                </div>
-              ) : (
-                <Link
-                  to={item.path}
-                  onClick={onClose}
-                  className={cn(
-                    "flex items-center justify-between p-3 rounded-lg text-sm font-medium transition-colors cursor-pointer group",
-                    isItemActive
-                      ? "bg-blue-50 text-blue-700 border border-blue-200"
-                      : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
-                  )}
-                >
-                  <div className="flex items-center space-x-3">
-                    <Icon className="h-5 w-5" />
-                    <span>{item.label}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {item.badge && (
-                      <Badge
-                        variant="secondary"
-                        className="text-xs bg-gray-100 text-gray-600"
-                      >
-                        {item.badge}
-                      </Badge>
-                    )}
-                  </div>
-                </Link>
-              )}
-
-              {/* Submenu */}
-              <AnimatePresence>
-                {hasSubmenu && isExpanded && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
+                ) : (
+                  <Link
+                    to={item.path}
+                    onClick={onClose}
+                    className={cn("nav-item", isItemActive && "active")}
                   >
-                    <div className="ml-8 mt-2 space-y-1">
-                      {item.submenu.map((subItem) => {
-                        // Handle action items (like Create Booking) differently
-                        if (subItem.isAction) {
-                          const ActionIcon = subItem.icon || MessageSquare;
-                          return (
-                            <button
-                              key={subItem.label}
-                              onClick={() => {
-                                setShowManualBookingDialog(true);
-                                if (isMobile) onClose();
-                              }}
-                              className={cn(
-                                "w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors text-left",
-                                "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                              )}
-                            >
-                              {ActionIcon && <ActionIcon className="h-4 w-4" />}
-                              {subItem.label}
-                            </button>
-                          );
-                        }
-                        
-                        return (
-                          <Link
-                            key={subItem.path}
-                            to={subItem.path}
-                            onClick={onClose}
-                            className={cn(
-                              "block px-3 py-2 text-sm rounded-md transition-colors",
-                              location.pathname === subItem.path
-                                ? "bg-blue-50 text-blue-700 font-medium"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                            )}
-                          >
-                            {subItem.label}
-                          </Link>
-                        );
-                      })}
+                    <div className="nav-icon-wrap" style={isItemActive ? { background: item.bgColor } : {}}>
+                      <Icon size={15} style={{ color: isItemActive ? item.iconColor : "#64748b" }} />
                     </div>
-                  </motion.div>
+                    <span style={{ flex: 1 }}>{item.label}</span>
+                    {item.badge && (
+                      <span style={{ fontSize: 10, fontWeight: 600, background: isItemActive ? item.bgColor : "#f1f5f9", color: isItemActive ? item.iconColor : "#64748b", padding: "2px 7px", borderRadius: 20 }}>
+                        {item.badge}
+                      </span>
+                    )}
+                  </Link>
                 )}
-              </AnimatePresence>
-            </div>
-          );
-        })}
+
+                {/* Submenu */}
+                <AnimatePresence>
+                  {hasSubmenu && isExpanded && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      style={{ overflow: "hidden" }}
+                    >
+                      <div style={{ marginLeft: 10, marginTop: 2, display: "flex", flexDirection: "column", gap: 1, paddingLeft: 34, borderLeft: "2px solid #e0f2fe" }}>
+                        {item.submenu.map((subItem) => {
+                          if (subItem.isAction) {
+                            const ActionIcon = subItem.icon || CalendarPlus;
+                            return (
+                              <button
+                                key={subItem.label}
+                                onClick={() => { setShowManualBookingDialog(true); if (isMobile) onClose(); }}
+                                style={{ display: "flex", alignItems: "center", gap: 7, padding: "7px 10px", fontSize: 12.5, fontWeight: 500, color: "#3b82f6", background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: 8, cursor: "pointer", textAlign: "left", width: "100%", marginTop: 2 }}
+                              >
+                                <ActionIcon size={12} />
+                                {subItem.label}
+                              </button>
+                            );
+                          }
+                          const SubIcon = subItem.icon;
+                          const subActive = location.pathname === subItem.path;
+                          return (
+                            <Link
+                              key={subItem.path}
+                              to={subItem.path}
+                              onClick={onClose}
+                              style={{
+                                display: "flex", alignItems: "center", gap: 7,
+                                padding: "7px 10px", borderRadius: 8, fontSize: 12.5,
+                                fontWeight: subActive ? 600 : 400,
+                                color: subActive ? "#1d4ed8" : "#64748b",
+                                background: subActive ? "#eff6ff" : "transparent",
+                                textDecoration: "none",
+                                transition: "all 0.15s ease",
+                              }}
+                              onMouseEnter={e => { if (!subActive) e.currentTarget.style.background = "#f8fafc"; }}
+                              onMouseLeave={e => { if (!subActive) e.currentTarget.style.background = "transparent"; }}
+                            >
+                              {SubIcon && <SubIcon size={12} style={{ color: subActive ? "#3b82f6" : "#94a3b8", flexShrink: 0 }} />}
+                              {subItem.label}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+        </div>
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-200">
-        <div className="space-y-2">
-          <Button
-            variant="ghost"
-            className="w-full justify-start text-gray-700 hover:bg-gray-50"
-          >
-            <Settings className="h-4 w-4 mr-3" />
-            Settings
-          </Button>
-          <Button
-            variant="ghost"
-            className="w-full justify-start text-red-600 hover:bg-red-50"
-          >
-            <LogOut className="h-4 w-4 mr-3" />
-            Logout
-          </Button>
-        </div>
+      <div style={{ padding: "12px 12px 16px", borderTop: "1px solid hsl(213,30%,93%)" }}>
+        <button
+          style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "9px 12px", borderRadius: 10, background: "none", border: "none", cursor: "pointer", fontSize: 13.5, fontWeight: 500, color: "#64748b", transition: "all 0.18s" }}
+          onMouseEnter={e => { e.currentTarget.style.background = "#f8fafc"; e.currentTarget.style.color = "#334155"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "none"; e.currentTarget.style.color = "#64748b"; }}
+        >
+          <div style={{ width: 32, height: 32, borderRadius: 8, background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Settings size={15} color="#64748b" />
+          </div>
+          Settings
+        </button>
+        <button
+          style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "9px 12px", borderRadius: 10, background: "none", border: "none", cursor: "pointer", fontSize: 13.5, fontWeight: 500, color: "#ef4444", transition: "all 0.18s" }}
+          onMouseEnter={e => { e.currentTarget.style.background = "#fef2f2"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "none"; }}
+        >
+          <div style={{ width: 32, height: 32, borderRadius: 8, background: "#fef2f2", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <LogOut size={15} color="#ef4444" />
+          </div>
+          Logout
+        </button>
       </div>
     </div>
   );
@@ -305,34 +261,31 @@ const SidebarShadcn = ({ isMobile, isOpen, onClose }) => {
         <AnimatePresence>
           {isOpen && (
             <>
-              {/* Backdrop */}
               <motion.div
-                className="fixed inset-0 bg-black bg-opacity-50 z-40"
+                className="fixed inset-0 z-40"
+                style={{ background: "rgba(15,23,42,0.45)", backdropFilter: "blur(2px)" }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={onClose}
               />
-              {/* Sidebar */}
               <motion.div
-                className="fixed left-0 top-0 h-full w-80 z-50"
-                initial={{ x: -320 }}
+                className="fixed left-0 top-0 h-full z-50"
+                style={{ width: 260 }}
+                initial={{ x: -260 }}
                 animate={{ x: 0 }}
-                exit={{ x: -320 }}
-                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                exit={{ x: -260 }}
+                transition={{ type: "spring", damping: 28, stiffness: 220 }}
               >
                 {sidebarContent}
               </motion.div>
             </>
           )}
         </AnimatePresence>
-        {/* Manual Booking Dialog for mobile */}
         <ManualBookingDialog
           open={showManualBookingDialog}
           onOpenChange={setShowManualBookingDialog}
-          onSuccess={() => {
-            console.log("Manual booking created successfully");
-          }}
+          onSuccess={() => console.log("Manual booking created successfully")}
         />
       </>
     );
@@ -340,17 +293,14 @@ const SidebarShadcn = ({ isMobile, isOpen, onClose }) => {
 
   return (
     <>
-      <div className="hidden md:flex md:w-80 md:flex-col md:fixed md:inset-y-0 md:z-40 md:overflow-y-auto">
+      <div className="hidden md:block" style={{ position: "fixed", top: 0, left: 0, bottom: 0, width: 260, zIndex: 40 }}>
         {sidebarContent}
       </div>
-      {/* Manual Booking Dialog for desktop */}
       {!isMobile && (
         <ManualBookingDialog
           open={showManualBookingDialog}
           onOpenChange={setShowManualBookingDialog}
-          onSuccess={() => {
-            console.log("Manual booking created successfully");
-          }}
+          onSuccess={() => console.log("Manual booking created successfully")}
         />
       )}
     </>

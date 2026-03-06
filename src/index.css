@@ -1,80 +1,191 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 210 40% 98%;
+    --foreground: 220 30% 12%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 220 30% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
+    --popover-foreground: 220 30% 12%;
+    --primary: 213 94% 50%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 84% 4.9%;
-    --destructive: 0 84.2% 60.2%;
+    --secondary: 210 40% 94%;
+    --secondary-foreground: 220 30% 12%;
+    --muted: 210 35% 95%;
+    --muted-foreground: 215 20% 55%;
+    --accent: 210 40% 92%;
+    --accent-foreground: 213 94% 40%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
-    --chart-1: 12 76% 61%;
+    --border: 213 30% 88%;
+    --input: 213 30% 90%;
+    --ring: 213 94% 50%;
+    --radius: 0.625rem;
+    --chart-1: 213 94% 50%;
     --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
+    --chart-3: 197 37% 38%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-  }
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 84% 4.9%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 94.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    /* Custom design tokens */
+    --sidebar-bg: 0 0% 100%;
+    --sidebar-border: 213 30% 90%;
+    --sidebar-active-bg: 213 94% 96%;
+    --sidebar-active-text: 213 94% 40%;
+    --canvas-bg: 210 40% 97%;
+    --card-shadow: 0 1px 3px rgba(59, 130, 246, 0.07), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --card-shadow-hover: 0 8px 24px rgba(59, 130, 246, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
   }
 }
 
 @layer base {
   * {
     @apply border-border;
+    box-sizing: border-box;
   }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground;
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-      sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background: linear-gradient(135deg, hsl(210, 48%, 97%) 0%, hsl(220, 40%, 96%) 50%, hsl(200, 45%, 97%) 100%);
+    min-height: 100vh;
   }
 
   code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-      monospace;
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
   }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(210, 40%, 96%);
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(213, 60%, 75%);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(213, 80%, 60%);
+}
+
+/* Global transitions */
+a, button {
+  transition: all 0.18s ease;
+}
+
+/* Card polish */
+.admin-card {
+  background: white;
+  border-radius: 14px;
+  border: 1px solid hsl(213, 30%, 92%);
+  box-shadow: var(--card-shadow);
+  transition: box-shadow 0.25s ease, transform 0.2s ease;
+}
+.admin-card:hover {
+  box-shadow: var(--card-shadow-hover);
+  transform: translateY(-1px);
+}
+
+/* Glass Header */
+.glass-header {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(147, 197, 253, 0.3);
+}
+
+/* Stat card gradient accents */
+.stat-blue   { background: linear-gradient(135deg, #dbeafe, #eff6ff); border-left: 3px solid #3b82f6; }
+.stat-sky    { background: linear-gradient(135deg, #e0f2fe, #f0f9ff); border-left: 3px solid #0ea5e9; }
+.stat-indigo { background: linear-gradient(135deg, #e0e7ff, #eef2ff); border-left: 3px solid #6366f1; }
+.stat-cyan   { background: linear-gradient(135deg, #cffafe, #ecfeff); border-left: 3px solid #06b6d4; }
+
+/* Sidebar nav item */
+.nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: hsl(220, 20%, 40%);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  text-decoration: none;
+  border: 1px solid transparent;
+}
+.nav-item:hover {
+  background: hsl(213, 60%, 96%);
+  color: hsl(213, 94%, 40%);
+}
+.nav-item.active {
+  background: hsl(213, 90%, 95%);
+  color: hsl(213, 90%, 38%);
+  border-color: hsl(213, 80%, 87%);
+  font-weight: 600;
+}
+.nav-item.active .nav-icon-wrap {
+  background: hsl(213, 90%, 88%);
+  color: hsl(213, 90%, 40%);
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 60%;
+  width: 3px;
+  background: hsl(213, 94%, 50%);
+  border-radius: 0 3px 3px 0;
+}
+
+.nav-icon-wrap {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: hsl(210, 35%, 95%);
+  flex-shrink: 0;
+  transition: all 0.18s ease;
+}
+
+.nav-item:hover .nav-icon-wrap {
+  background: hsl(213, 80%, 90%);
+}
+
+/* Pulse animation for notification badge */
+@keyframes pulse-ring {
+  0%   { transform: scale(1); opacity: 0.8; }
+  70%  { transform: scale(1.4); opacity: 0; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+.pulse-badge::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #ef4444;
+  animation: pulse-ring 1.5s ease-out infinite;
 }

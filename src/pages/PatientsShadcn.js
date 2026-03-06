@@ -35,6 +35,7 @@ import {
 } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Badge } from "../components/ui/badge";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import {
   Select,
@@ -461,10 +462,10 @@ const PatientsShadcn = memo(() => {
           prevPatients.map((p) =>
             p.uid === patient.uid
               ? {
-                  ...p,
-                  phoneNumber: result.phoneNumber,
-                  whatsappNumber: result.phoneNumber,
-                }
+                ...p,
+                phoneNumber: result.phoneNumber,
+                whatsappNumber: result.phoneNumber,
+              }
               : p
           )
         );
@@ -566,636 +567,531 @@ const PatientsShadcn = memo(() => {
   }, [filterStatus]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="flex flex-col items-center justify-center p-8">
-            <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-            <h3 className="text-xl font-semibold mb-2">Loading Patients...</h3>
-            <p className="text-muted-foreground text-center">
-              Fetching patient data from Soocher
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <LoadingSpinner fullHeight message="Loading Patients..." />;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-2xl p-8 text-white shadow-xl">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-              <div>
-                <h1 className="text-4xl font-bold mb-2">{getPageTitle()}</h1>
-                <p className="text-green-100 text-lg">{getPageDescription()}</p>
-              </div>
-              {stats && (
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-                    <CardContent className="p-4 text-center">
-                      <div className="text-2xl font-bold text-white">
-                        {stats.total}
-                      </div>
-                      <div className="text-green-100 text-sm">
-                        Total Patients
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-                    <CardContent className="p-4 text-center">
-                      <div className="text-2xl font-bold text-white">
-                        {stats.verified}
-                      </div>
-                      <div className="text-green-100 text-sm">
-                        Healthy (80+)
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-                    <CardContent className="p-4 text-center">
-                      <div className="text-2xl font-bold text-white">
-                        {stats.pending}
-                      </div>
-                      <div className="text-green-100 text-sm">
-                        Needs Attention
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-                    <CardContent className="p-4 text-center">
-                      <div className="text-2xl font-bold text-white">
-                        {Math.round(stats.averageHealthScore || 0)}
-                      </div>
-                      <div className="text-green-100 text-sm">
-                        Avg Health Score
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
+    <div style={{ maxWidth: 1280, margin: "0 auto" }}>
+
+      {/* Page Header */}
+      <div style={{ marginBottom: 22, display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+            <div style={{ width: 28, height: 28, borderRadius: 8, background: "linear-gradient(135deg,#6366f1,#8b5cf6)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <User size={14} color="white" />
             </div>
+            <h1 style={{ margin: 0, fontSize: 21, fontWeight: 800, color: "#1e3a5f", letterSpacing: "-0.4px" }}>{getPageTitle()}</h1>
           </div>
+          <p style={{ margin: 0, fontSize: 13, color: "#64748b" }}>{getPageDescription()}</p>
         </div>
-
-        {/* Filters */}
-        <Card className="mb-8 shadow-lg">
-          <CardContent className="p-6">
-            <div className="space-y-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  placeholder="Search patients by name, email, city, or phone number..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 h-12 text-base"
-                />
+        {stats && (
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            {[
+              { label: "Total", value: stats.total, color: "#6366f1", bg: "#e0e7ff" },
+              { label: "Healthy (80+)", value: stats.verified, color: "#10b981", bg: "#d1fae5" },
+              { label: "Needs Attention", value: stats.pending, color: "#f59e0b", bg: "#fef3c7" },
+              { label: "Avg Health", value: `${Math.round(stats.averageHealthScore || 0)}`, color: "#3b82f6", bg: "#dbeafe" },
+            ].map(s => (
+              <div key={s.label} style={{ padding: "6px 14px", borderRadius: 20, background: s.bg, display: "flex", alignItems: "center", gap: 6, border: `1px solid ${s.color}22` }}>
+                <span style={{ fontSize: 15, fontWeight: 800, color: s.color }}>{s.value}</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: s.color }}>{s.label}</span>
               </div>
+            ))}
+          </div>
+        )}
+      </div>
 
-              <div className="flex flex-col lg:flex-row gap-4">
-                <div className="flex flex-col sm:flex-row gap-4 flex-1">
-                  <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger className="h-12">
-                      <SelectValue placeholder="Filter by health status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Patients</SelectItem>
-                      <SelectItem value="verified">Healthy (80+)</SelectItem>
-                      <SelectItem value="pending">
-                        Needs Attention (&lt;60)
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+      {/* Filters */}
+      <div className="admin-card" style={{ padding: "14px 18px", marginBottom: 16, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+        <div style={{ flex: 1, minWidth: 220, position: "relative" }}>
+          <Search size={13} style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "#93c5fd" }} />
+          <input
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            placeholder="Search by name, email, city or phone…"
+            style={{ width: "100%", paddingLeft: 30, paddingRight: 12, height: 36, borderRadius: 9, border: "1.5px solid #bfdbfe", background: "#f0f7ff", fontSize: 12.5, color: "#1e3a5f", outline: "none", fontFamily: "Inter,sans-serif", boxSizing: "border-box" }}
+            onFocus={e => { e.currentTarget.style.borderColor = "#3b82f6"; e.currentTarget.style.background = "white"; }}
+            onBlur={e => { e.currentTarget.style.borderColor = "#bfdbfe"; e.currentTarget.style.background = "#f0f7ff"; }}
+          />
+        </div>
+        <Select value={filterStatus} onValueChange={setFilterStatus}>
+          <SelectTrigger style={{ width: 168, height: 36, borderRadius: 9, border: "1.5px solid #bfdbfe", background: "white", fontSize: 12.5, fontFamily: "Inter,sans-serif" }}>
+            <SelectValue placeholder="Health Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Patients</SelectItem>
+            <SelectItem value="verified">Healthy (80+)</SelectItem>
+            <SelectItem value="pending">Needs Attention (&lt;60)</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={filterGender} onValueChange={setFilterGender}>
+          <SelectTrigger style={{ width: 140, height: 36, borderRadius: 9, border: "1.5px solid #bfdbfe", background: "white", fontSize: 12.5, fontFamily: "Inter,sans-serif" }}>
+            <SelectValue placeholder="Gender" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Genders</SelectItem>
+            {genders.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <button
+          onClick={() => { setSearchTerm(""); setFilterStatus("all"); setFilterGender("all"); }}
+          style={{ height: 36, padding: "0 14px", borderRadius: 9, border: "1.5px solid #bfdbfe", background: "white", fontSize: 12, color: "#64748b", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, fontFamily: "Inter,sans-serif", transition: "all 0.15s" }}
+          onMouseEnter={e => { e.currentTarget.style.background = "#f0f7ff"; e.currentTarget.style.color = "#1e3a5f"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "white"; e.currentTarget.style.color = "#64748b"; }}
+        >
+          <RotateCcw size={12} /> Reset
+        </button>
+      </div>
 
-                  <Select value={filterGender} onValueChange={setFilterGender}>
-                    <SelectTrigger className="h-12">
-                      <SelectValue placeholder="Filter by gender" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Genders</SelectItem>
-                      {genders.map((gender) => (
-                        <SelectItem key={gender} value={gender}>
-                          {gender}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setSearchTerm("");
-                    setFilterStatus("all");
-                    setFilterGender("all");
-                  }}
-                  className="h-12 px-6"
-                >
-                  <RotateCcw className="h-4 w-4 mr-2" />
-                  Reset Filters
-                </Button>
-              </div>
+      {/* Table */}
+      <div className="admin-card" style={{ padding: 0, overflow: "hidden" }}>
+        {filteredPatients.length === 0 ? (
+          <div style={{ padding: "60px 24px", textAlign: "center" }}>
+            <User size={40} style={{ color: "#c7d2fe", margin: "0 auto 12px" }} />
+            <p style={{ fontSize: 15, fontWeight: 600, color: "#1e3a5f" }}>No patients found</p>
+            <p style={{ fontSize: 12.5, color: "#94a3b8" }}>Try adjusting your filters</p>
+          </div>
+        ) : (
+          <>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 780 }}>
+                <thead>
+                  <tr style={{ background: "#f8fbff", borderBottom: "1.5px solid #e0f2fe" }}>
+                    {["Patient", "Gender", "Health Score", "Location", "Contact", "Status", "Actions"].map(h => (
+                      <th key={h} style={{ padding: "11px 14px", fontSize: 10.5, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.5px", textAlign: "left", whiteSpace: "nowrap" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedPatients.map((patient, idx) => {
+                    const hs = patient?.healthScore || 0;
+                    const hsColor = hs >= 80 ? "#10b981" : hs >= 60 ? "#3b82f6" : "#f59e0b";
+                    return (
+                      <tr
+                        key={patient.uid}
+                        style={{ borderBottom: "1px solid #f0f7ff", background: idx % 2 === 0 ? "white" : "#fafcff", transition: "background 0.15s", cursor: "pointer" }}
+                        onMouseEnter={e => e.currentTarget.style.background = "#f5f3ff"}
+                        onMouseLeave={e => e.currentTarget.style.background = idx % 2 === 0 ? "white" : "#fafcff"}
+                        onClick={() => handleViewDetails(patient)}
+                      >
+                        {/* Patient Name + Avatar */}
+                        <td style={{ padding: "12px 14px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <Avatar style={{ width: 34, height: 34, flexShrink: 0 }}>
+                              <AvatarImage src={patient?.profileImage} />
+                              <AvatarFallback style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)", color: "white", fontSize: 12, fontWeight: 700 }}>
+                                {getDisplayName(patient)?.[0] || "P"}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#1e3a5f" }}>{getDisplayName(patient)}</p>
+                              <p style={{ margin: 0, fontSize: 10.5, color: "#94a3b8" }}>{patient?.email || "No email"}</p>
+                            </div>
+                          </div>
+                        </td>
+                        {/* Gender */}
+                        <td style={{ padding: "12px 14px" }}>
+                          <span style={{ fontSize: 12.5, color: "#64748b" }}>{patient?.gender || "—"}</span>
+                        </td>
+                        {/* Health Score */}
+                        <td style={{ padding: "12px 14px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <div style={{ width: 50, height: 6, borderRadius: 3, background: "#e0f2fe", overflow: "hidden" }}>
+                              <div style={{ height: "100%", width: `${hs}%`, background: hsColor, borderRadius: 3, transition: "width 0.4s ease" }} />
+                            </div>
+                            <span style={{ fontSize: 12, fontWeight: 700, color: hsColor }}>{hs}</span>
+                          </div>
+                        </td>
+                        {/* Location */}
+                        <td style={{ padding: "12px 14px" }}>
+                          <span style={{ fontSize: 12.5, color: "#64748b" }}>{[patient?.currentCity, patient?.currentState].filter(Boolean).join(", ") || "—"}</span>
+                        </td>
+                        {/* Contact */}
+                        <td style={{ padding: "12px 14px" }}>
+                          {patient?.phoneNumber ? (
+                            <span style={{ fontSize: 12.5, color: "#334155" }}>{patient.phoneNumber}</span>
+                          ) : (
+                            <button
+                              onClick={e => { e.stopPropagation(); handleFetchPhoneNumber(patient); }}
+                              disabled={fetchingPhoneNumbers[patient.uid]}
+                              style={{ fontSize: 11, padding: "4px 10px", borderRadius: 7, border: "1px solid #c7d2fe", background: "#f5f3ff", color: "#6366f1", cursor: "pointer", fontFamily: "Inter,sans-serif", display: "flex", alignItems: "center", gap: 4 }}
+                            >
+                              {fetchingPhoneNumbers[patient.uid] ? <Loader2 size={10} style={{ animation: "spin 1s linear infinite" }} /> : null}
+                              Fetch Phone
+                            </button>
+                          )}
+                        </td>
+                        {/* Status */}
+                        <td style={{ padding: "12px 14px" }}>{getStatusBadge(patient)}</td>
+                        {/* Actions */}
+                        <td style={{ padding: "12px 14px" }} onClick={e => e.stopPropagation()}>
+                          <div style={{ display: "flex", gap: 6 }}>
+                            <button
+                              onClick={() => handleViewDetails(patient)}
+                              style={{ width: 30, height: 30, borderRadius: 8, border: "1.5px solid #c7d2fe", background: "#f5f3ff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "all 0.15s" }}
+                              onMouseEnter={e => { e.currentTarget.style.background = "#ede9fe"; e.currentTarget.style.borderColor = "#6366f1"; }}
+                              onMouseLeave={e => { e.currentTarget.style.background = "#f5f3ff"; e.currentTarget.style.borderColor = "#c7d2fe"; }}
+                            >
+                              <Eye size={13} color="#6366f1" />
+                            </button>
+                            <button
+                              onClick={() => handleEditPatient(patient)}
+                              style={{ width: 30, height: 30, borderRadius: 8, border: "1.5px solid #bfdbfe", background: "#f0f7ff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "all 0.15s" }}
+                              onMouseEnter={e => { e.currentTarget.style.background = "#dbeafe"; e.currentTarget.style.borderColor = "#3b82f6"; }}
+                              onMouseLeave={e => { e.currentTarget.style.background = "#f0f7ff"; e.currentTarget.style.borderColor = "#bfdbfe"; }}
+                            >
+                              <Edit size={13} color="#3b82f6" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Patients List */}
-        <div className="space-y-6">
-          {filteredPatients.length === 0 ? (
-            <Card className="text-center py-12">
-              <CardContent>
-                <User className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-xl font-semibold mb-2">
-                  {filterStatus === "pending"
-                    ? "No patients need attention"
-                    : filterStatus === "verified"
-                    ? "No healthy patients found"
-                    : "No patients found"}
-                </h3>
-                <p className="text-muted-foreground">
-                  {filterStatus === "pending"
-                    ? "All patients have good health scores"
-                    : filterStatus === "verified"
-                    ? "No patients with health scores 80+ found"
-                    : "Try adjusting your search or filter criteria"}
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {paginatedPatients.map((patient) => (
-                  <PatientCard
-                    key={patient.uid}
-                    patient={patient}
-                    onViewDetails={handleViewDetails}
-                    onEditPatient={handleEditPatient}
-                    onFetchPhoneNumber={handleFetchPhoneNumber}
-                    fetchingPhoneNumbers={fetchingPhoneNumbers}
-                    getStatusBadge={getStatusBadge}
-                    getDisplayName={getDisplayName}
-                    formatDate={formatDate}
-                  />
-                ))}
-              </div>
-
-              {/* Pagination Controls */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-center space-x-2 mt-8">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      setCurrentPage((prev) => Math.max(prev - 1, 1))
-                    }
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 18px", borderTop: "1px solid #f0f7ff" }}>
+                <span style={{ fontSize: 12, color: "#64748b" }}>
+                  Showing {startIndex + 1}–{Math.min(endIndex, filteredPatients.length)} of {filteredPatients.length}
+                </span>
+                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
                     disabled={currentPage === 1}
-                  >
-                    Previous
-                  </Button>
-
-                  <div className="flex items-center space-x-1">
-                    {(() => {
-                      const pages = [];
-                      const showEllipsis = totalPages > 7;
-
-                      if (showEllipsis) {
-                        // Always show first 2 pages
-                        for (let i = 1; i <= 2; i++) {
-                          pages.push(
-                            <Button
-                              key={i}
-                              variant={
-                                currentPage === i ? "default" : "outline"
-                              }
-                              size="sm"
-                              onClick={() => setCurrentPage(i)}
-                              className="w-8 h-8 p-0"
-                            >
-                              {i}
-                            </Button>
-                          );
-                        }
-
-                        // Show ellipsis if current page is far from start
-                        if (currentPage > 4) {
-                          pages.push(
-                            <span
-                              key="ellipsis-start"
-                              className="px-2 text-gray-500"
-                            >
-                              ...
-                            </span>
-                          );
-                        }
-
-                        // Show current page and surrounding pages
-                        const startPage = Math.max(3, currentPage - 1);
-                        const endPage = Math.min(
-                          totalPages - 2,
-                          currentPage + 1
-                        );
-
-                        for (let i = startPage; i <= endPage; i++) {
-                          if (i > 2 && i < totalPages - 1) {
-                            pages.push(
-                              <Button
-                                key={i}
-                                variant={
-                                  currentPage === i ? "default" : "outline"
-                                }
-                                size="sm"
-                                onClick={() => setCurrentPage(i)}
-                                className="w-8 h-8 p-0"
-                              >
-                                {i}
-                              </Button>
-                            );
-                          }
-                        }
-
-                        // Show ellipsis if current page is far from end
-                        if (currentPage < totalPages - 3) {
-                          pages.push(
-                            <span
-                              key="ellipsis-end"
-                              className="px-2 text-gray-500"
-                            >
-                              ...
-                            </span>
-                          );
-                        }
-
-                        // Always show last 2 pages
-                        for (let i = totalPages - 1; i <= totalPages; i++) {
-                          if (i > 2) {
-                            pages.push(
-                              <Button
-                                key={i}
-                                variant={
-                                  currentPage === i ? "default" : "outline"
-                                }
-                                size="sm"
-                                onClick={() => setCurrentPage(i)}
-                                className="w-8 h-8 p-0"
-                              >
-                                {i}
-                              </Button>
-                            );
-                          }
-                        }
-                      } else {
-                        // Show all pages if total is 7 or less
-                        for (let i = 1; i <= totalPages; i++) {
-                          pages.push(
-                            <Button
-                              key={i}
-                              variant={
-                                currentPage === i ? "default" : "outline"
-                              }
-                              size="sm"
-                              onClick={() => setCurrentPage(i)}
-                              className="w-8 h-8 p-0"
-                            >
-                              {i}
-                            </Button>
-                          );
-                        }
-                      }
-
-                      return pages;
-                    })()}
-                  </div>
-
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                    }
+                    style={{ padding: "5px 12px", borderRadius: 8, border: "1.5px solid #bfdbfe", background: currentPage === 1 ? "#f8fbff" : "white", fontSize: 12, color: currentPage === 1 ? "#94a3b8" : "#6366f1", cursor: currentPage === 1 ? "not-allowed" : "pointer", fontFamily: "Inter,sans-serif" }}
+                  >← Prev</button>
+                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                    const page = totalPages <= 5 ? i + 1 : Math.max(1, currentPage - 2) + i;
+                    if (page > totalPages) return null;
+                    return (
+                      <button key={page} onClick={() => setCurrentPage(page)}
+                        style={{ width: 30, height: 30, borderRadius: 8, border: `1.5px solid ${currentPage === page ? "#6366f1" : "#bfdbfe"}`, background: currentPage === page ? "#6366f1" : "white", color: currentPage === page ? "white" : "#334155", fontSize: 12, fontWeight: currentPage === page ? 700 : 400, cursor: "pointer", fontFamily: "Inter,sans-serif" }}>
+                        {page}
+                      </button>
+                    );
+                  })}
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                  >
-                    Next
-                  </Button>
+                    style={{ padding: "5px 12px", borderRadius: 8, border: "1.5px solid #bfdbfe", background: currentPage === totalPages ? "#f8fbff" : "white", fontSize: 12, color: currentPage === totalPages ? "#94a3b8" : "#6366f1", cursor: currentPage === totalPages ? "not-allowed" : "pointer", fontFamily: "Inter,sans-serif" }}
+                  >Next →</button>
                 </div>
-              )}
-
-              {/* Results info */}
-              <div className="text-center text-sm text-gray-500 mt-4">
-                Showing {startIndex + 1}-
-                {Math.min(endIndex, filteredPatients.length)} of{" "}
-                {filteredPatients.length} patients
               </div>
-            </>
-          )}
-        </div>
+            )}
+          </>
+        )}
+      </div>
 
-        {/* Patient Detail Dialog */}
-        <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Patient Details</DialogTitle>
-              <DialogDescription>
-                Complete information about the selected patient
-              </DialogDescription>
-            </DialogHeader>
-            {selectedPatient && (
-              <div className="space-y-6">
-                <div className="flex items-center space-x-4">
-                  <Avatar className="h-20 w-20">
+      {/* Patient Detail Dialog - Compact Dashboard Style */}
+      <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
+        <DialogContent style={{ maxWidth: 560, maxHeight: "85vh", overflowY: "auto", padding: "0", borderRadius: 14, border: "1.5px solid #e0e7ff" }}>
+          {selectedPatient && (
+            <>
+              {/* Header */}
+              <div style={{ padding: "16px 20px 14px", background: "linear-gradient(135deg,#f5f3ff,#ede9fe)", borderBottom: "1px solid #ddd6fe", borderRadius: "14px 14px 0 0" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <Avatar style={{ width: 40, height: 40, flexShrink: 0 }}>
                     <AvatarImage src={selectedPatient?.profileImage} />
-                    <AvatarFallback className="bg-gradient-to-br from-green-500 to-blue-600 text-white text-2xl font-semibold">
+                    <AvatarFallback style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)", color: "white", fontSize: 14, fontWeight: 700 }}>
                       {selectedPatient?.name?.charAt(0) || "P"}
                     </AvatarFallback>
                   </Avatar>
-                  <div>
-                    <h3 className="text-2xl font-bold">
-                      {getDisplayName(selectedPatient)}
-                    </h3>
-                    <p className="text-muted-foreground text-lg">
-                      {selectedPatient?.gender}
-                    </p>
-                    {getStatusBadge(selectedPatient)}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                      <span style={{ fontSize: 15, fontWeight: 700, color: "#1e3a5f" }}>{getDisplayName(selectedPatient)}</span>
+                      {getStatusBadge(selectedPatient)}
+                    </div>
+                    <span style={{ fontSize: 11.5, color: "#64748b" }}>
+                      {selectedPatient?.gender || "—"}
+                      {selectedPatient?.currentCity ? ` · ${selectedPatient.currentCity}` : ""}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => { setShowDetailsDialog(false); handleEditPatient(selectedPatient); }}
+                    style={{ padding: "5px 12px", borderRadius: 8, border: "1.5px solid #d0d9ff", background: "white", fontSize: 11.5, color: "#6366f1", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, fontFamily: "Inter,sans-serif", whiteSpace: "nowrap" }}
+                  >
+                    <Edit size={11} /> Edit
+                  </button>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div style={{ padding: "14px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
+                {/* Contact */}
+                <div style={{ background: "#f8fbff", borderRadius: 9, border: "1px solid #e0e7ff", overflow: "hidden" }}>
+                  <div style={{ padding: "6px 12px", background: "#f5f3ff", borderBottom: "1px solid #e0e7ff" }}>
+                    <span style={{ fontSize: 10.5, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.3px" }}>Contact</span>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0 }}>
+                    {[
+                      { label: "UID", value: selectedPatient?.uid?.slice(0, 14) + "…" || "N/A" },
+                      { label: "Phone", value: selectedPatient?.phoneNumber || "—" },
+                      { label: "WhatsApp", value: selectedPatient?.whatsappNumber || "—" },
+                      { label: "Email", value: selectedPatient?.email || "—" },
+                    ].map((row, i) => (
+                      <div key={row.label} style={{ display: "flex", flexDirection: "column", padding: "7px 12px", borderTop: i >= 2 ? "1px solid #ede9fe" : "none", borderLeft: i % 2 === 1 ? "1px solid #ede9fe" : "none" }}>
+                        <span style={{ fontSize: 10, fontWeight: 600, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.3px" }}>{row.label}</span>
+                        <span style={{ fontSize: 12, color: "#1e3a5f", fontWeight: 500, wordBreak: "break-word" }}>{row.value}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">
-                        Contact Information
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex items-center">
-                        <User className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <span className="font-mono text-sm">
-                          UID: {selectedPatient?.uid || "Not provided"}
-                        </span>
-                      </div>
-                      <div className="flex items-center">
-                        <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <span>
-                          {selectedPatient?.phoneNumber || "Not provided"}
-                        </span>
-                      </div>
-                      <div className="flex items-center">
-                        <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <span>{selectedPatient?.email || "Not provided"}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
+                {/* Health & Location */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  {/* Health Score */}
+                  <div style={{ background: "#f8fbff", borderRadius: 9, border: "1px solid #e0e7ff", overflow: "hidden" }}>
+                    <div style={{ padding: "6px 12px", background: "#f5f3ff", borderBottom: "1px solid #e0e7ff" }}>
+                      <span style={{ fontSize: 10.5, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.3px" }}>Health Score</span>
+                    </div>
+                    <div style={{ padding: "10px 12px" }}>
+                      {(() => {
+                        const hs = selectedPatient?.healthScore || 0;
+                        const color = hs >= 80 ? "#10b981" : hs >= 60 ? "#3b82f6" : "#f59e0b";
+                        return (
+                          <>
+                            <span style={{ fontSize: 22, fontWeight: 800, color }}>{hs}<span style={{ fontSize: 12, color: "#94a3b8" }}>/100</span></span>
+                            <div style={{ marginTop: 6, height: 5, borderRadius: 3, background: "#e0f2fe", overflow: "hidden" }}>
+                              <div style={{ height: "100%", width: `${hs}%`, background: color, borderRadius: 3 }} />
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+                  </div>
 
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Location</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex items-center">
-                        <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <span>
-                          {selectedPatient?.currentCity || "N/A"},{" "}
-                          {selectedPatient?.currentState || "N/A"}
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">
-                        Health Information
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div>
-                        <span className="font-medium">Health Score:</span>
-                        <span className="ml-2">
-                          {selectedPatient?.healthScore || 0}/100
-                        </span>
-                      </div>
-                      <div>
-                        <span className="font-medium">Family Members:</span>
-                        <span className="ml-2">
-                          {selectedPatient?.familyMembers?.length || 0}
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Account Details</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div>
-                        <span className="font-medium">Joined:</span>
-                        <span className="ml-2">
-                          {formatDate(selectedPatient?.dateOfAccountCreation)}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="font-medium">Status:</span>
-                        <span className="ml-2">
-                          {selectedPatient?.isAccountVerified
-                            ? "Verified"
-                            : "Pending"}
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  {/* Location */}
+                  <div style={{ background: "#f8fbff", borderRadius: 9, border: "1px solid #e0e7ff", overflow: "hidden" }}>
+                    <div style={{ padding: "6px 12px", background: "#f5f3ff", borderBottom: "1px solid #e0e7ff" }}>
+                      <span style={{ fontSize: 10.5, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.3px" }}>Location</span>
+                    </div>
+                    <div style={{ padding: "7px 12px", display: "flex", flexDirection: "column", gap: 4 }}>
+                      {[
+                        { label: "City", value: selectedPatient?.currentCity || "—" },
+                        { label: "State", value: selectedPatient?.currentState || "—" },
+                      ].map(row => (
+                        <div key={row.label} style={{ display: "flex", justifyContent: "space-between" }}>
+                          <span style={{ fontSize: 11, color: "#94a3b8" }}>{row.label}</span>
+                          <span style={{ fontSize: 12, color: "#1e3a5f", fontWeight: 500 }}>{row.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setShowDetailsDialog(false)}
-              >
-                Close
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
 
-        {/* Image Modal */}
-        <Dialog open={showImageModal} onOpenChange={setShowImageModal}>
-          <DialogContent className="max-w-4xl">
-            <DialogHeader>
-              <DialogTitle>{selectedImageTitle}</DialogTitle>
-            </DialogHeader>
-            {selectedImage && (
-              <div className="flex items-center justify-center">
-                <img
-                  src={selectedImage}
-                  alt={selectedImageTitle}
-                  className="max-w-full max-h-[70vh] object-contain rounded-lg"
-                />
-              </div>
-            )}
-            <DialogFooter>
-              <Button variant="outline" onClick={closeImageModal}>
-                Close
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Edit Patient Dialog */}
-        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Edit Patient Information</DialogTitle>
-              <DialogDescription>
-                Update patient details and save changes
-              </DialogDescription>
-            </DialogHeader>
-            {editingPatient && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Name *</label>
-                    <Input
-                      value={editFormData.name}
-                      onChange={(e) =>
-                        setEditFormData({
-                          ...editFormData,
-                          name: e.target.value,
-                        })
-                      }
-                      placeholder="Patient's full name"
-                    />
+                {/* Account Details */}
+                <div style={{ background: "#f8fbff", borderRadius: 9, border: "1px solid #e0e7ff", overflow: "hidden" }}>
+                  <div style={{ padding: "6px 12px", background: "#f5f3ff", borderBottom: "1px solid #e0e7ff" }}>
+                    <span style={{ fontSize: 10.5, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.3px" }}>Account</span>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Gender *</label>
-                    <Input
-                      value={editFormData.gender}
-                      onChange={(e) =>
-                        setEditFormData({
-                          ...editFormData,
-                          gender: e.target.value,
-                        })
-                      }
-                      placeholder="Male/Female/Other"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Phone Number</label>
-                    <Input
-                      value={editFormData.phoneNumber}
-                      onChange={(e) =>
-                        setEditFormData({
-                          ...editFormData,
-                          phoneNumber: e.target.value,
-                        })
-                      }
-                      placeholder="+91XXXXXXXXXX"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">
-                      WhatsApp Number
-                    </label>
-                    <Input
-                      value={editFormData.whatsappNumber}
-                      onChange={(e) =>
-                        setEditFormData({
-                          ...editFormData,
-                          whatsappNumber: e.target.value,
-                        })
-                      }
-                      placeholder="+91XXXXXXXXXX"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Email</label>
-                    <Input
-                      value={editFormData.email}
-                      onChange={(e) =>
-                        setEditFormData({
-                          ...editFormData,
-                          email: e.target.value,
-                        })
-                      }
-                      placeholder="patient@example.com"
-                      type="email"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">City</label>
-                    <Input
-                      value={editFormData.currentCity}
-                      onChange={(e) =>
-                        setEditFormData({
-                          ...editFormData,
-                          currentCity: e.target.value,
-                        })
-                      }
-                      placeholder="Current city"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">State</label>
-                    <Input
-                      value={editFormData.currentState}
-                      onChange={(e) =>
-                        setEditFormData({
-                          ...editFormData,
-                          currentState: e.target.value,
-                        })
-                      }
-                      placeholder="Current state"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Health Score</label>
-                    <Input
-                      value={editFormData.healthScore}
-                      onChange={(e) =>
-                        setEditFormData({
-                          ...editFormData,
-                          healthScore: parseInt(e.target.value) || 0,
-                        })
-                      }
-                      placeholder="0-100"
-                      type="number"
-                      min="0"
-                      max="100"
-                    />
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0 }}>
+                    {[
+                      { label: "Joined", value: formatDate(selectedPatient?.dateOfAccountCreation) },
+                      { label: "Family Members", value: selectedPatient?.familyMembers?.length || 0 },
+                      { label: "Status", value: selectedPatient?.isAccountVerified ? "Verified" : "Pending" },
+                    ].map((row, i) => (
+                      <div key={row.label} style={{ display: "flex", flexDirection: "column", padding: "7px 12px", borderTop: i >= 2 ? "1px solid #ede9fe" : "none", borderLeft: i % 2 === 1 ? "1px solid #ede9fe" : "none" }}>
+                        <span style={{ fontSize: 10, fontWeight: 600, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.3px" }}>{row.label}</span>
+                        <span style={{ fontSize: 12, color: "#1e3a5f", fontWeight: 500 }}>{row.value}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
-            )}
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setShowEditDialog(false)}
-                disabled={editLoading}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSaveEdit}
-                disabled={editLoading}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                {editLoading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Edit className="h-4 w-4 mr-2" />
-                    Save Changes
-                  </>
-                )}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
+
+              {/* Footer */}
+              <div style={{ padding: "10px 20px", borderTop: "1px solid #e0e7ff", display: "flex", justifyContent: "flex-end" }}>
+                <button
+                  onClick={() => setShowDetailsDialog(false)}
+                  style={{ padding: "6px 16px", borderRadius: 8, border: "1.5px solid #d0d9ff", background: "white", fontSize: 12, color: "#64748b", cursor: "pointer", fontFamily: "Inter,sans-serif" }}
+                >
+                  Close
+                </button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Image Modal */}
+      <Dialog open={showImageModal} onOpenChange={setShowImageModal}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>{selectedImageTitle}</DialogTitle>
+          </DialogHeader>
+          {selectedImage && (
+            <div className="flex items-center justify-center">
+              <img
+                src={selectedImage}
+                alt={selectedImageTitle}
+                className="max-w-full max-h-[70vh] object-contain rounded-lg"
+              />
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={closeImageModal}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Patient Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Patient Information</DialogTitle>
+            <DialogDescription>
+              Update patient details and save changes
+            </DialogDescription>
+          </DialogHeader>
+          {editingPatient && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Name *</label>
+                  <Input
+                    value={editFormData.name}
+                    onChange={(e) =>
+                      setEditFormData({
+                        ...editFormData,
+                        name: e.target.value,
+                      })
+                    }
+                    placeholder="Patient's full name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Gender *</label>
+                  <Input
+                    value={editFormData.gender}
+                    onChange={(e) =>
+                      setEditFormData({
+                        ...editFormData,
+                        gender: e.target.value,
+                      })
+                    }
+                    placeholder="Male/Female/Other"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Phone Number</label>
+                  <Input
+                    value={editFormData.phoneNumber}
+                    onChange={(e) =>
+                      setEditFormData({
+                        ...editFormData,
+                        phoneNumber: e.target.value,
+                      })
+                    }
+                    placeholder="+91XXXXXXXXXX"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    WhatsApp Number
+                  </label>
+                  <Input
+                    value={editFormData.whatsappNumber}
+                    onChange={(e) =>
+                      setEditFormData({
+                        ...editFormData,
+                        whatsappNumber: e.target.value,
+                      })
+                    }
+                    placeholder="+91XXXXXXXXXX"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Email</label>
+                  <Input
+                    value={editFormData.email}
+                    onChange={(e) =>
+                      setEditFormData({
+                        ...editFormData,
+                        email: e.target.value,
+                      })
+                    }
+                    placeholder="patient@example.com"
+                    type="email"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">City</label>
+                  <Input
+                    value={editFormData.currentCity}
+                    onChange={(e) =>
+                      setEditFormData({
+                        ...editFormData,
+                        currentCity: e.target.value,
+                      })
+                    }
+                    placeholder="Current city"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">State</label>
+                  <Input
+                    value={editFormData.currentState}
+                    onChange={(e) =>
+                      setEditFormData({
+                        ...editFormData,
+                        currentState: e.target.value,
+                      })
+                    }
+                    placeholder="Current state"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Health Score</label>
+                  <Input
+                    value={editFormData.healthScore}
+                    onChange={(e) =>
+                      setEditFormData({
+                        ...editFormData,
+                        healthScore: parseInt(e.target.value) || 0,
+                      })
+                    }
+                    placeholder="0-100"
+                    type="number"
+                    min="0"
+                    max="100"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowEditDialog(false)}
+              disabled={editLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveEdit}
+              disabled={editLoading}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {editLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Save Changes
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 });

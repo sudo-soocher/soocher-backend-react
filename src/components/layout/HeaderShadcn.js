@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Bell,
   Search,
@@ -8,15 +7,8 @@ import {
   User,
   Menu,
   ChevronDown,
-  Sun,
-  Moon,
 } from "lucide-react";
 import { useAuthContext } from "../../context/AuthContext";
-import ThemeToggle from "../ThemeToggle";
-
-// shadcn components
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 import {
@@ -38,123 +30,102 @@ const HeaderShadcn = ({ onMenuClick, isMobile }) => {
   };
 
   const notifications = [
-    { id: 1, title: "New doctor registered", time: "2 min ago", unread: true },
-    {
-      id: 2,
-      title: "Withdrawal request pending",
-      time: "15 min ago",
-      unread: true,
-    },
-    {
-      id: 3,
-      title: "Patient consultation completed",
-      time: "1 hour ago",
-      unread: false,
-    },
-    {
-      id: 4,
-      title: "System maintenance scheduled",
-      time: "2 hours ago",
-      unread: false,
-    },
+    { id: 1, title: "New doctor registered", time: "2 min ago", unread: true, color: "#3b82f6" },
+    { id: 2, title: "Withdrawal request pending", time: "15 min ago", unread: true, color: "#f59e0b" },
+    { id: 3, title: "Patient consultation completed", time: "1 hour ago", unread: false, color: "#10b981" },
+    { id: 4, title: "System maintenance scheduled", time: "2 hours ago", unread: false, color: "#6366f1" },
   ];
 
   const unreadCount = notifications.filter((n) => n.unread).length;
 
   return (
-    <header className="bg-background border-b border-border shadow-sm">
-      <div className="flex items-center justify-between px-6 py-4">
-        {/* Left Section */}
-        <div className="flex items-center space-x-4">
+    <header className="glass-header" style={{ position: "sticky", top: 0, zIndex: 30 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", height: 62 }}>
+
+        {/* Left */}
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           {isMobile && (
-            <Button
-              variant="ghost"
-              size="icon"
+            <button
               onClick={onMenuClick}
-              className="h-10 w-10"
+              style={{ background: "#f0f7ff", border: "1px solid #bfdbfe", borderRadius: 9, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
             >
-              <Menu className="h-5 w-5" />
-            </Button>
+              <Menu size={17} color="#3b82f6" />
+            </button>
           )}
           <div>
-            <h1 className="text-2xl font-bold text-foreground">
+            <h1 style={{ fontSize: 17, fontWeight: 700, color: "#1e3a5f", margin: 0, letterSpacing: "-0.3px" }}>
               Admin Dashboard
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p style={{ fontSize: 11, color: "#94a3b8", margin: 0, fontWeight: 500 }}>
               Soocher Management System
             </p>
           </div>
         </div>
 
-        {/* Center Section - Search */}
-        <div className="flex-1 max-w-md mx-8">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              type="text"
-              placeholder="Search doctors, patients, reports..."
-              className="pl-10 h-10"
-            />
+        {/* Center — Search */}
+        {!isMobile && (
+          <div style={{ flex: 1, maxWidth: 380, margin: "0 32px" }}>
+            <div style={{ position: "relative" }}>
+              <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "#93c5fd" }} />
+              <input
+                type="text"
+                placeholder="Search doctors, patients, reports…"
+                style={{
+                  width: "100%",
+                  paddingLeft: 34,
+                  paddingRight: 14,
+                  height: 37,
+                  borderRadius: 10,
+                  border: "1.5px solid #bfdbfe",
+                  background: "#f0f7ff",
+                  fontSize: 12.5,
+                  color: "#1e3a5f",
+                  outline: "none",
+                  fontFamily: "Inter, sans-serif",
+                  transition: "all 0.2s",
+                }}
+                onFocus={e => { e.currentTarget.style.borderColor = "#3b82f6"; e.currentTarget.style.background = "white"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(59,130,246,0.1)"; }}
+                onBlur={e => { e.currentTarget.style.borderColor = "#bfdbfe"; e.currentTarget.style.background = "#f0f7ff"; e.currentTarget.style.boxShadow = "none"; }}
+              />
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Right Section */}
-        <div className="flex items-center space-x-4">
-          {/* Theme Toggle */}
-          <ThemeToggle />
+        {/* Right */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
 
-          {/* Notifications */}
+          {/* Notification bell */}
           <Popover open={showNotifications} onOpenChange={setShowNotifications}>
             <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10 relative"
+              <button style={{ position: "relative", background: "#f0f7ff", border: "1.5px solid #bfdbfe", borderRadius: 10, width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "all 0.18s" }}
+                onMouseEnter={e => { e.currentTarget.style.background = "white"; e.currentTarget.style.borderColor = "#3b82f6"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(59,130,246,0.1)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "#f0f7ff"; e.currentTarget.style.borderColor = "#bfdbfe"; e.currentTarget.style.boxShadow = "none"; }}
               >
-                <Bell className="h-5 w-5" />
+                <Bell size={16} color="#3b82f6" />
                 {unreadCount > 0 && (
-                  <Badge
-                    variant="destructive"
-                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-                  >
+                  <span className="pulse-badge" style={{ position: "absolute", top: -4, right: -4, background: "#ef4444", color: "white", borderRadius: "50%", width: 17, height: 17, fontSize: 9, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid white" }}>
                     {unreadCount}
-                  </Badge>
+                  </span>
                 )}
-              </Button>
+              </button>
             </PopoverTrigger>
-            <PopoverContent className="w-80 p-0" align="end">
-              <div className="p-4 border-b">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold">Notifications</h3>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowNotifications(false)}
-                  >
-                    Mark all read
-                  </Button>
-                </div>
+            <PopoverContent style={{ width: 320, padding: 0, borderRadius: 14, border: "1px solid #bfdbfe", boxShadow: "0 8px 30px rgba(59,130,246,0.12)" }} align="end">
+              <div style={{ padding: "14px 16px", borderBottom: "1px solid #e0f2fe", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontWeight: 700, fontSize: 13.5, color: "#1e3a5f" }}>Notifications</span>
+                <button onClick={() => setShowNotifications(false)} style={{ fontSize: 11, color: "#3b82f6", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>
+                  Mark all read
+                </button>
               </div>
-              <div className="max-h-80 overflow-y-auto">
-                {notifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`p-4 border-b last:border-b-0 hover:bg-gray-50 ${
-                      notification.unread ? "bg-blue-50" : ""
-                    }`}
+              <div style={{ maxHeight: 300, overflowY: "auto" }}>
+                {notifications.map((n) => (
+                  <div key={n.id} style={{ padding: "12px 16px", borderBottom: "1px solid #f0f7ff", background: n.unread ? "#fafcff" : "white", display: "flex", gap: 10, alignItems: "flex-start", cursor: "pointer", transition: "all 0.15s" }}
+                    onMouseEnter={e => e.currentTarget.style.background = "#eff6ff"}
+                    onMouseLeave={e => e.currentTarget.style.background = n.unread ? "#fafcff" : "white"}
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">
-                          {notification.title}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {notification.time}
-                        </p>
-                      </div>
-                      {notification.unread && (
-                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                      )}
+                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: n.unread ? n.color : "#e2e8f0", marginTop: 4, flexShrink: 0 }} />
+                    <div style={{ flex: 1 }}>
+                      <p style={{ margin: 0, fontSize: 12.5, fontWeight: n.unread ? 600 : 400, color: "#1e3a5f" }}>{n.title}</p>
+                      <p style={{ margin: "2px 0 0", fontSize: 11, color: "#94a3b8" }}>{n.time}</p>
                     </div>
                   </div>
                 ))}
@@ -162,57 +133,63 @@ const HeaderShadcn = ({ onMenuClick, isMobile }) => {
             </PopoverContent>
           </Popover>
 
-          {/* User Menu */}
+          {/* Divider */}
+          <div style={{ width: 1, height: 24, background: "#e0f2fe", margin: "0 2px" }} />
+
+          {/* User dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-10 px-3">
-                <div className="flex items-center space-x-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={user?.photoURL} />
-                    <AvatarFallback>
-                      <User className="h-4 w-4" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="text-left">
-                    <p className="text-sm font-medium">
+              <button style={{ display: "flex", alignItems: "center", gap: 9, padding: "5px 10px 5px 5px", borderRadius: 11, border: "1.5px solid #bfdbfe", background: "#f0f7ff", cursor: "pointer", transition: "all 0.18s" }}
+                onMouseEnter={e => { e.currentTarget.style.background = "white"; e.currentTarget.style.borderColor = "#3b82f6"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(59,130,246,0.08)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "#f0f7ff"; e.currentTarget.style.borderColor = "#bfdbfe"; e.currentTarget.style.boxShadow = "none"; }}
+              >
+                <Avatar style={{ width: 28, height: 28 }}>
+                  <AvatarImage src={user?.photoURL} />
+                  <AvatarFallback style={{ background: "linear-gradient(135deg,#3b82f6,#6366f1)", color: "white", fontSize: 11, fontWeight: 700 }}>
+                    {user?.displayName?.[0] || user?.email?.[0]?.toUpperCase() || "A"}
+                  </AvatarFallback>
+                </Avatar>
+                {!isMobile && (
+                  <div style={{ textAlign: "left" }}>
+                    <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: "#1e3a5f" }}>
                       {user?.displayName || user?.email?.split("@")[0]}
                     </p>
-                    <p className="text-xs text-gray-500">Administrator</p>
+                    <p style={{ margin: 0, fontSize: 10, color: "#94a3b8" }}>Administrator</p>
                   </div>
-                  <ChevronDown className="h-4 w-4" />
-                </div>
-              </Button>
+                )}
+                <ChevronDown size={12} color="#94a3b8" />
+              </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" style={{ width: 220, borderRadius: 14, border: "1px solid #bfdbfe", boxShadow: "0 8px 30px rgba(59,130,246,0.12)" }}>
               <DropdownMenuLabel>
-                <div className="flex items-center space-x-3">
-                  <Avatar className="h-8 w-8">
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <Avatar style={{ width: 34, height: 34 }}>
                     <AvatarImage src={user?.photoURL} />
-                    <AvatarFallback>
-                      <User className="h-4 w-4" />
+                    <AvatarFallback style={{ background: "linear-gradient(135deg,#3b82f6,#6366f1)", color: "white", fontSize: 13, fontWeight: 700 }}>
+                      {user?.displayName?.[0] || "A"}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-medium">
+                    <p style={{ margin: 0, fontSize: 12.5, fontWeight: 700, color: "#1e3a5f" }}>
                       {user?.displayName || user?.email?.split("@")[0]}
                     </p>
-                    <p className="text-xs text-gray-500">{user?.email}</p>
+                    <p style={{ margin: 0, fontSize: 10.5, color: "#94a3b8" }}>{user?.email}</p>
                   </div>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" />
-                <span>Profile</span>
+              <DropdownMenuItem style={{ cursor: "pointer", fontSize: 13, color: "#334155" }}>
+                <User size={14} style={{ marginRight: 8, color: "#3b82f6" }} />
+                Profile
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
+              <DropdownMenuItem style={{ cursor: "pointer", fontSize: 13, color: "#334155" }}>
+                <Settings size={14} style={{ marginRight: 8, color: "#6366f1" }} />
+                Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="text-red-600">
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Logout</span>
+              <DropdownMenuItem onClick={handleLogout} style={{ cursor: "pointer", fontSize: 13, color: "#ef4444" }}>
+                <LogOut size={14} style={{ marginRight: 8 }} />
+                Logout
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

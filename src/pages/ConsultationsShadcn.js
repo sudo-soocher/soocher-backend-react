@@ -35,6 +35,7 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
+
 import { Input } from "../components/ui/input";
 import {
   Select,
@@ -268,427 +269,210 @@ const ConsultationsShadcn = () => {
   };
 
   if (loading && consultations.length === 0) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="flex flex-col items-center justify-center p-8">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Loading Consultations
-            </h3>
-            <p className="text-gray-600 text-center">
-              Fetching consultation data from Soocher
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <LoadingSpinner fullHeight message="Fetching consultation data from Soocher..." />;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-8"
-        >
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-blue-100 rounded-full">
-                <MessageSquare className="h-6 w-6 text-blue-600" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  Consultations
-                </h1>
-                <p className="text-gray-600">
-                  for {formatDate(selectedDate)} • {consultations.length} total
-                </p>
-              </div>
+    <div className="space-y-5">
+      {/* Page Header */}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 6 }}>
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+            <div style={{ width: 28, height: 28, borderRadius: 8, background: "linear-gradient(135deg,#3b82f6,#2563eb)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <MessageSquare size={14} color="white" />
             </div>
-            <div className="flex items-center space-x-4 mt-4 sm:mt-0">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="flex items-center space-x-2"
-                  >
-                    <CalendarDays className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium">
-                      {formatDate(selectedDate)}
-                    </span>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={(date) => {
-                      if (date) {
-                        setSelectedDate(date);
-                      }
-                    }}
-                    initialFocus
-                    className="rounded-md border"
-                  />
-                </PopoverContent>
-              </Popover>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRefresh}
-                disabled={loading}
-              >
-                <RefreshCw
-                  className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
-                />
-                Refresh
-              </Button>
-            </div>
+            <h1 style={{ margin: 0, fontSize: 21, fontWeight: 800, color: "#1e3a5f", letterSpacing: "-0.4px" }}>Consultations</h1>
           </div>
-        </motion.div>
-
-        {/* Filters */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="mb-8"
-        >
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="relative flex-1 max-w-md">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder="Search consultations..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Filter className="h-4 w-4 text-gray-500" />
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Filter by status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {statusOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Error State */}
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6"
+          <p style={{ margin: 0, fontSize: 13, color: "#64748b" }}>
+            for {formatDate(selectedDate)} • {consultations.length} total
+          </p>
+        </div>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button style={{ height: 36, padding: "0 14px", borderRadius: 9, border: "1.5px solid #bfdbfe", background: "white", fontSize: 13, fontWeight: 600, color: "#1e3a5f", display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+                <CalendarDays size={14} color="#3b82f6" />
+                {formatDate(selectedDate)}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <CalendarComponent
+                mode="single"
+                selected={selectedDate}
+                onSelect={(date) => { if (date) setSelectedDate(date); }}
+                initialFocus
+                className="rounded-md border"
+              />
+            </PopoverContent>
+          </Popover>
+          <button
+            onClick={handleRefresh}
+            disabled={loading}
+            style={{ height: 36, padding: "0 14px", borderRadius: 9, border: "1.5px solid #e0e7ff", background: "#f8fafc", fontSize: 13, fontWeight: 600, color: "#64748b", display: "flex", alignItems: "center", gap: 6, cursor: loading ? "not-allowed" : "pointer" }}
           >
-            <Card className="border-red-200 bg-red-50">
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <AlertCircle className="h-5 w-5 text-red-600" />
-                  <span className="text-red-800">{error}</span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleRefresh}
-                    className="ml-auto"
-                  >
-                    Retry
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
+            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+            Refresh
+          </button>
+        </div>
+      </div>
 
-        {/* Consultations List */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          {filteredConsultations.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center p-12">
-                <MessageSquare className="h-16 w-16 text-gray-300 mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  No consultations found
-                </h3>
-                <p className="text-gray-600 text-center max-w-md">
-                  {searchTerm
-                    ? "No consultations match your search criteria"
-                    : "No consultations available at the moment"}
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-4">
-              {filteredConsultations.map((consultation, index) => (
-                <motion.div
-                  key={consultation.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  whileHover={{ y: -2 }}
-                >
-                  <Card className="hover:shadow-xl transition-all duration-300 border-l-4 border-l-blue-500 hover:border-l-blue-600">
-                    <CardContent className="p-0">
-                      {/* Header Section */}
-                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4">
-                            <div className="flex items-center space-x-3">
-                              <Badge
-                                variant="secondary"
-                                className="font-mono text-xs bg-blue-100 text-blue-800 hover:bg-blue-200"
-                              >
-                                #
-                                {consultation.consultationId?.slice(-8) ||
-                                  "N/A"}
-                              </Badge>
-                              <Badge
-                                variant={getStatusBadgeVariant(
-                                  consultation.status
-                                )}
-                                className="flex items-center space-x-1.5 px-3 py-1"
-                              >
-                                {getStatusIcon(consultation.status)}
-                                <span className="font-medium">
-                                  {consultation.status}
-                                </span>
-                              </Badge>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-3">
-                            <div className="flex items-center space-x-2 px-3 py-2 bg-white rounded-lg border">
-                              {getConsultationTypeIcon(consultation)}
-                              <span className="text-xs font-medium text-gray-600">
-                                {consultation.videoConsultDone
-                                  ? "Video"
-                                  : "Phone"}
-                              </span>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 w-8 p-0"
-                            >
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Main Content */}
-                      <div className="p-6">
-                        {/* Patient and Doctor Info */}
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                          <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl">
-                            <Avatar className="h-12 w-12 ring-2 ring-blue-100">
-                              <AvatarFallback className="bg-blue-100 text-blue-700 font-semibold">
-                                {consultation.patientName?.charAt(0) || "P"}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                              <p className="font-semibold text-gray-900 text-base">
-                                {consultation.patientName || "N/A"}
-                              </p>
-                              <p className="text-sm text-gray-500 font-medium">
-                                Patient
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl">
-                            <Avatar className="h-12 w-12 ring-2 ring-green-100">
-                              <AvatarFallback className="bg-green-100 text-green-700 font-semibold">
-                                {consultation.doctorName?.charAt(0) || "D"}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                              <p className="font-semibold text-gray-900 text-base">
-                                {consultation.doctorName || "N/A"}
-                              </p>
-                              <p className="text-sm text-gray-500 font-medium">
-                                Doctor
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Consultation Details Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                          <div className="space-y-3">
-                            <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
-                              <div className="p-2 bg-blue-100 rounded-lg">
-                                <Calendar className="h-4 w-4 text-blue-600" />
-                              </div>
-                              <div>
-                                <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide">
-                                  Scheduled Time
-                                </p>
-                                <p className="text-sm font-medium text-gray-900">
-                                  {consultation.formattedConsultationTime}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="space-y-3">
-                            <div className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg">
-                              <div className="p-2 bg-purple-100 rounded-lg">
-                                <Clock className="h-4 w-4 text-purple-600" />
-                              </div>
-                              <div>
-                                <p className="text-xs font-semibold text-purple-600 uppercase tracking-wide">
-                                  Duration
-                                </p>
-                                <p className="text-sm font-medium text-gray-900">
-                                  {consultation.duration}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Notes Section */}
-                        {consultation.patientDetails?.notesForDoctor && (
-                          <div className="mb-6">
-                            <div className="flex items-center space-x-3 p-3 bg-amber-50 rounded-lg">
-                              <div className="p-2 bg-amber-100 rounded-lg">
-                                <MessageSquare className="h-4 w-4 text-amber-600" />
-                              </div>
-                              <div className="flex-1">
-                                <p className="text-xs font-semibold text-amber-600 uppercase tracking-wide mb-2">
-                                  Patient Notes
-                                </p>
-                                <p className="text-sm text-gray-800 bg-white p-3 rounded-lg border border-amber-200">
-                                  {consultation.patientDetails.notesForDoctor}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Actual Times */}
-                        {consultation.actualStartTime && (
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
-                              <div className="p-2 bg-green-100 rounded-lg">
-                                <Play className="h-4 w-4 text-green-600" />
-                              </div>
-                              <div>
-                                <p className="text-xs font-semibold text-green-600 uppercase tracking-wide">
-                                  Started At
-                                </p>
-                                <p className="text-sm font-medium text-gray-900">
-                                  {consultation.formattedActualStartTime}
-                                </p>
-                              </div>
-                            </div>
-                            {consultation.actualEndTime && (
-                              <div className="flex items-center space-x-3 p-3 bg-red-50 rounded-lg">
-                                <div className="p-2 bg-red-100 rounded-lg">
-                                  <CheckCircle className="h-4 w-4 text-red-600" />
-                                </div>
-                                <div>
-                                  <p className="text-xs font-semibold text-red-600 uppercase tracking-wide">
-                                    Ended At
-                                  </p>
-                                  <p className="text-sm font-medium text-gray-900">
-                                    {consultation.formattedActualEndTime}
-                                  </p>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Actions */}
-                        <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                          <div className="flex items-center space-x-3">
-                            <Button
-                              onClick={() => handleViewDetails(consultation)}
-                              className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2"
-                            >
-                              <Eye className="h-4 w-4" />
-                              <span>View Details</span>
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                handleCopyConsultationId(
-                                  consultation.consultationId
-                                )
-                              }
-                              className={`flex items-center space-x-2 px-3 py-2 ${
-                                copiedId === consultation.consultationId
-                                  ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
-                                  : "hover:bg-gray-50"
-                              }`}
-                            >
-                              <Copy className="h-4 w-4" />
-                              <span>
-                                {copiedId === consultation.consultationId
-                                  ? "Copied!"
-                                  : "Copy ID"}
-                              </span>
-                            </Button>
-                          </div>
-                          <div className="text-xs text-gray-400 font-mono">
-                            ID:{" "}
-                            {consultation.consultationId?.slice(-12) || "N/A"}
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
+      {/* Filters */}
+      <div className="admin-card" style={{ padding: "14px 18px", marginBottom: 16, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+        <div style={{ flex: 1, minWidth: 220, position: "relative" }}>
+          <Search size={13} style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "#93c5fd" }} />
+          <input
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            placeholder="Search consultations..."
+            style={{ width: "100%", paddingLeft: 30, paddingRight: 12, height: 36, borderRadius: 9, border: "1.5px solid #bfdbfe", background: "#f0f7ff", fontSize: 12.5, color: "#1e3a5f", outline: "none", fontFamily: "Inter,sans-serif", boxSizing: "border-box" }}
+            onFocus={e => { e.currentTarget.style.borderColor = "#3b82f6"; e.currentTarget.style.background = "white"; }}
+            onBlur={e => { e.currentTarget.style.borderColor = "#bfdbfe"; e.currentTarget.style.background = "#f0f7ff"; }}
+          />
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Filter size={14} color="#64748b" />
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger style={{ width: 168, height: 36, borderRadius: 9, border: "1.5px solid #bfdbfe", background: "white", fontSize: 12.5, fontFamily: "Inter,sans-serif" }}>
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              {statusOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
               ))}
-            </div>
-          )}
-        </motion.div>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
-        {/* Load More Button */}
-        {hasMore && filteredConsultations.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="flex justify-center mt-8"
-          >
-            <Button
-              onClick={handleLoadMore}
-              disabled={loading}
-              variant="outline"
-              className="px-8"
-            >
-              {loading ? (
-                <>
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  Loading...
-                </>
-              ) : (
-                "Load More"
-              )}
-            </Button>
-          </motion.div>
+      {/* Error State */}
+      {error && (
+        <div style={{ padding: "12px 16px", borderRadius: 10, background: "#fef2f2", border: "1px solid #fecaca", color: "#ef4444", fontSize: 13, display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+          <AlertCircle size={16} />
+          <span style={{ flex: 1 }}>{error}</span>
+          <button onClick={handleRefresh} style={{ padding: "4px 10px", borderRadius: 6, border: "1px solid #fca5a5", background: "white", color: "#ef4444", fontSize: 12, cursor: "pointer" }}>Retry</button>
+        </div>
+      )}
+
+      {/* Consultations Table */}
+      <div className="admin-card" style={{ padding: 0, overflow: "hidden" }}>
+        {filteredConsultations.length === 0 ? (
+          <div style={{ padding: "60px 24px", textAlign: "center" }}>
+            <MessageSquare size={40} style={{ color: "#bfdbfe", margin: "0 auto 12px" }} />
+            <p style={{ fontSize: 15, fontWeight: 600, color: "#1e3a5f" }}>No consultations found</p>
+            <p style={{ fontSize: 12.5, color: "#94a3b8" }}>
+              {searchTerm ? "No consultations match your search criteria" : "No consultations available at the moment"}
+            </p>
+          </div>
+        ) : (
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 900 }}>
+              <thead>
+                <tr style={{ background: "#f8fbff", borderBottom: "1.5px solid #e0f2fe" }}>
+                  {["Consultation ID", "Patient", "Doctor", "Scheduled Time", "Duration", "Type", "Status", "Actions"].map(h => (
+                    <th key={h} style={{ padding: "11px 14px", fontSize: 10.5, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.5px", textAlign: "left", whiteSpace: "nowrap" }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredConsultations.map((consultation, idx) => (
+                  <tr
+                    key={consultation.id}
+                    style={{ borderBottom: "1px solid #f0f7ff", background: idx % 2 === 0 ? "white" : "#fafcff", transition: "background 0.15s" }}
+                    onMouseEnter={e => e.currentTarget.style.background = "#f5f3ff"}
+                    onMouseLeave={e => e.currentTarget.style.background = idx % 2 === 0 ? "white" : "#fafcff"}
+                  >
+                    <td style={{ padding: "12px 14px", fontFamily: "monospace", fontSize: 12.5, color: "#64748b" }}>
+                      #{consultation.consultationId?.slice(-8) || "N/A"}
+                    </td>
+                    <td style={{ padding: "12px 14px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <Avatar className="h-7 w-7 ring-1 ring-blue-100">
+                          <AvatarFallback className="bg-blue-50 text-blue-700 text-xs font-semibold">
+                            {consultation.patientName?.charAt(0) || "P"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: "#1e3a5f" }}>{consultation.patientName || "N/A"}</span>
+                      </div>
+                    </td>
+                    <td style={{ padding: "12px 14px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <Avatar className="h-7 w-7 ring-1 ring-green-100">
+                          <AvatarFallback className="bg-green-50 text-green-700 text-xs font-semibold">
+                            {consultation.doctorName?.charAt(0) || "D"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: "#1e3a5f" }}>{consultation.doctorName || "N/A"}</span>
+                      </div>
+                    </td>
+                    <td style={{ padding: "12px 14px", fontSize: 12.5, color: "#64748b" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <Calendar size={12} color="#94a3b8" />
+                        {consultation.formattedConsultationTime}
+                      </div>
+                    </td>
+                    <td style={{ padding: "12px 14px", fontSize: 12.5, color: "#1e3a5f", fontWeight: 600 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <Clock size={12} color="#94a3b8" />
+                        {consultation.duration}
+                      </div>
+                    </td>
+                    <td style={{ padding: "12px 14px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "2px 6px", borderRadius: 4, background: "#f1f5f9", width: "fit-content" }}>
+                        {getConsultationTypeIcon(consultation)}
+                        <span style={{ fontSize: 11, fontWeight: 600, color: "#475569" }}>{consultation.videoConsultDone ? "Video" : "Phone"}</span>
+                      </div>
+                    </td>
+                    <td style={{ padding: "12px 14px" }}>
+                      <Badge variant={getStatusBadgeVariant(consultation.status)} className="flex items-center space-x-1 px-2 py-0.5" style={{ width: "max-content", fontSize: 11 }}>
+                        {getStatusIcon(consultation.status)}
+                        <span className="font-medium">{consultation.status}</span>
+                      </Badge>
+                    </td>
+                    <td style={{ padding: "12px 14px" }}>
+                      <div style={{ display: "flex", gap: 6 }}>
+                        <button
+                          onClick={() => handleViewDetails(consultation)}
+                          style={{ padding: "4px 8px", borderRadius: 6, border: "1px solid #bfdbfe", background: "#eff6ff", color: "#2563eb", fontSize: 11, display: "flex", alignItems: "center", gap: 4, cursor: "pointer", transition: "all 0.15s" }}
+                          onMouseEnter={e => { e.currentTarget.style.background = "#dbeafe"; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = "#eff6ff"; }}
+                        >
+                          <Eye size={12} /> Details
+                        </button>
+                        <button
+                          onClick={() => handleCopyConsultationId(consultation.consultationId)}
+                          style={{ width: 24, height: 24, borderRadius: 6, border: "1px solid #e2e8f0", background: copiedId === consultation.consultationId ? "#ecfdf5" : "transparent", color: copiedId === consultation.consultationId ? "#10b981" : "#64748b", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "all 0.15s" }}
+                          onMouseEnter={e => { if (copiedId !== consultation.consultationId) { e.currentTarget.style.background = "#f1f5f9"; e.currentTarget.style.color = "#1e3a5f"; } }}
+                          onMouseLeave={e => { if (copiedId !== consultation.consultationId) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#64748b"; } }}
+                          title="Copy ID"
+                        >
+                          {copiedId === consultation.consultationId ? <CheckCircle size={12} /> : <Copy size={12} />}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
+
+      {/* Load More Button */}
+      {hasMore && filteredConsultations.length > 0 && (
+        <div style={{ display: "flex", justifyContent: "center", marginTop: 24 }}>
+          <button
+            onClick={handleLoadMore}
+            disabled={loading}
+            style={{ padding: "8px 24px", borderRadius: 20, border: "1.5px solid #bfdbfe", background: "#f0f7ff", fontSize: 13, fontWeight: 600, color: "#1e3a5f", display: "flex", alignItems: "center", gap: 8, cursor: loading ? "not-allowed" : "pointer", transition: "all 0.2s" }}
+            onMouseEnter={e => { if (!loading) { e.currentTarget.style.background = "#e0f2fe"; } }}
+            onMouseLeave={e => { if (!loading) { e.currentTarget.style.background = "#f0f7ff"; } }}
+          >
+            {loading ? (
+              <><RefreshCw size={14} className="animate-spin" /> Loading...</>
+            ) : "Load More"}
+          </button>
+        </div>
+      )}
     </div>
   );
 };

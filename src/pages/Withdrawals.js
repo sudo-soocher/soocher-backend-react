@@ -28,6 +28,7 @@ import {
 } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Badge } from "../components/ui/badge";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 import {
   Select,
   SelectContent,
@@ -191,247 +192,190 @@ const Withdrawals = () => {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-IN", {
       style: "currency",
-      currency: "USD",
+      currency: "INR",
+      minimumFractionDigits: 0,
     }).format(amount);
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="flex flex-col items-center justify-center p-8">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-4" />
-            <p className="text-gray-600">Loading withdrawals...</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <LoadingSpinner fullHeight message="Loading withdrawals..." />;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Withdrawal Management
-          </h1>
-          <p className="text-gray-600">
-            Manage and process withdrawal requests from doctors
-          </p>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    Total Requests
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {stats.total}
-                  </p>
-                </div>
-                <DollarSign className="h-8 w-8 text-blue-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Pending</p>
-                  <p className="text-2xl font-bold text-yellow-600">
-                    {stats.pending}
-                  </p>
-                </div>
-                <Clock className="h-8 w-8 text-yellow-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Approved</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {stats.approved}
-                  </p>
-                </div>
-                <CheckCircle className="h-8 w-8 text-green-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Rejected</p>
-                  <p className="text-2xl font-bold text-red-600">
-                    {stats.rejected}
-                  </p>
-                </div>
-                <XCircle className="h-8 w-8 text-red-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    Total Amount
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {formatCurrency(stats.totalAmount)}
-                  </p>
-                </div>
-                <TrendingUp className="h-8 w-8 text-purple-600" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Filters */}
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder="Search by ID, doctor name, or bank account..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-              <div className="sm:w-48">
-                <Select value={filterStatus} onValueChange={setFilterStatus}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="approved">Approved</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+    <div className="space-y-5">
+      {/* Page Header */}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 6 }}>
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+            <div style={{ width: 28, height: 28, borderRadius: 8, background: "linear-gradient(135deg,#10b981,#059669)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <DollarSign size={14} color="white" />
             </div>
-          </CardContent>
-        </Card>
+            <h1 style={{ margin: 0, fontSize: 21, fontWeight: 800, color: "#1e3a5f", letterSpacing: "-0.4px" }}>Withdrawal Management</h1>
+          </div>
+          <p style={{ margin: 0, fontSize: 13, color: "#64748b" }}>Manage and process withdrawal requests from doctors</p>
+        </div>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          {[
+            { label: "Total", value: stats.total, color: "#6366f1", bg: "#e0e7ff" },
+            { label: "Pending", value: stats.pending, color: "#f59e0b", bg: "#fef3c7" },
+            { label: "Approved", value: stats.approved, color: "#10b981", bg: "#d1fae5" },
+            { label: "Rejected", value: stats.rejected, color: "#ef4444", bg: "#fee2e2" },
+          ].map(s => (
+            <div key={s.label} style={{ padding: "6px 14px", borderRadius: 20, background: s.bg, display: "flex", alignItems: "center", gap: 6, border: `1px solid ${s.color}22` }}>
+              <span style={{ fontSize: 15, fontWeight: 800, color: s.color }}>{s.value}</span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: s.color }}>{s.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
 
-        {/* Withdrawals Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Withdrawal Requests</CardTitle>
-            <CardDescription>
-              {filteredWithdrawals.length} withdrawal request(s) found
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {filteredWithdrawals.length === 0 ? (
-              <div className="text-center py-12">
-                <DollarSign className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  No withdrawals found
-                </h3>
-                <p className="text-gray-600">
-                  Try adjusting your search or filter criteria
-                </p>
+      {/* Stats Cards */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16, marginBottom: 24 }}>
+        {[
+          { label: "Total Requests", value: stats.total, icon: DollarSign, color: "#3b82f6", bg: "#eff6ff" },
+          { label: "Pending", value: stats.pending, icon: Clock, color: "#f59e0b", bg: "#fffbeb" },
+          { label: "Approved", value: stats.approved, icon: CheckCircle, color: "#10b981", bg: "#ecfdf5" },
+          { label: "Rejected", value: stats.rejected, icon: XCircle, color: "#ef4444", bg: "#fef2f2" },
+          { label: "Total Amount", value: formatCurrency(stats.totalAmount), icon: TrendingUp, color: "#8b5cf6", bg: "#f5f3ff" },
+        ].map((stat, i) => (
+          <motion.div
+            key={stat.label}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.05 }}
+            className="admin-card"
+            style={{ padding: "12px 14px", position: "relative", overflow: "hidden" }}
+          >
+            <div style={{ position: "absolute", top: -5, right: -5, opacity: 0.05, transform: "rotate(-10deg)", pointerEvents: "none" }}>
+              <stat.icon size={60} color={stat.color} />
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 8, background: stat.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <stat.icon size={14} color={stat.color} />
               </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Doctor</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Bank Details</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Request Date</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredWithdrawals.map((withdrawal) => (
-                    <TableRow key={withdrawal.id}>
-                      <TableCell className="font-mono text-sm">
-                        {withdrawal.id}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
-                          <User className="h-4 w-4 text-gray-400" />
-                          <span className="font-medium">
-                            {withdrawal.userName}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-semibold">
-                        {formatCurrency(withdrawal.amount)}
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-1">
-                          <div className="flex items-center space-x-2">
-                            <CreditCard className="h-4 w-4 text-gray-400" />
-                            <span className="text-sm">
-                              {withdrawal.bankAccount}
-                            </span>
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {withdrawal.bankName}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(withdrawal.status)}</TableCell>
-                      <TableCell className="text-sm text-gray-600">
-                        {formatDate(withdrawal.requestDate)}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          {withdrawal.status === "pending" && (
-                            <>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="text-green-600 hover:text-green-700"
-                              >
-                                <CheckCircle className="h-4 w-4 mr-1" />
-                                Approve
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="text-red-600 hover:text-red-700"
-                              >
-                                <XCircle className="h-4 w-4 mr-1" />
-                                Reject
-                              </Button>
-                            </>
-                          )}
-                          <Button size="sm" variant="ghost">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
+              <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: "#64748b" }}>{stat.label}</p>
+            </div>
+            <h3 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: "#1e3a5f" }}>{stat.value}</h3>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Filters */}
+      <div className="admin-card" style={{ padding: "14px 18px", marginBottom: 16, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+        <div style={{ flex: 1, minWidth: 220, position: "relative" }}>
+          <Search size={13} style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "#93c5fd" }} />
+          <input
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            placeholder="Search by ID, doctor name, or bank account..."
+            style={{ width: "100%", paddingLeft: 30, paddingRight: 12, height: 36, borderRadius: 9, border: "1.5px solid #bfdbfe", background: "#f0f7ff", fontSize: 12.5, color: "#1e3a5f", outline: "none", fontFamily: "Inter,sans-serif", boxSizing: "border-box" }}
+            onFocus={e => { e.currentTarget.style.borderColor = "#3b82f6"; e.currentTarget.style.background = "white"; }}
+            onBlur={e => { e.currentTarget.style.borderColor = "#bfdbfe"; e.currentTarget.style.background = "#f0f7ff"; }}
+          />
+        </div>
+        <Select value={filterStatus} onValueChange={setFilterStatus}>
+          <SelectTrigger style={{ width: 168, height: 36, borderRadius: 9, border: "1.5px solid #bfdbfe", background: "white", fontSize: 12.5, fontFamily: "Inter,sans-serif" }}>
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="approved">Approved</SelectItem>
+            <SelectItem value="rejected">Rejected</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Withdrawals Table */}
+      <div className="admin-card" style={{ padding: 0, overflow: "hidden" }}>
+        {filteredWithdrawals.length === 0 ? (
+          <div style={{ padding: "60px 24px", textAlign: "center" }}>
+            <DollarSign size={40} style={{ color: "#bfdbfe", margin: "0 auto 12px" }} />
+            <p style={{ fontSize: 15, fontWeight: 600, color: "#1e3a5f" }}>No withdrawals found</p>
+            <p style={{ fontSize: 12.5, color: "#94a3b8" }}>Try adjusting your search or filter criteria</p>
+          </div>
+        ) : (
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 800 }}>
+              <thead>
+                <tr style={{ background: "#f8fbff", borderBottom: "1.5px solid #e0f2fe" }}>
+                  {["ID", "Doctor", "Amount", "Bank Details", "Status", "Request Date", "Actions"].map(h => (
+                    <th key={h} style={{ padding: "11px 14px", fontSize: 10.5, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.5px", textAlign: "left", whiteSpace: "nowrap" }}>{h}</th>
                   ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredWithdrawals.map((withdrawal, idx) => (
+                  <tr
+                    key={withdrawal.id}
+                    style={{ borderBottom: "1px solid #f0f7ff", background: idx % 2 === 0 ? "white" : "#fafcff", transition: "background 0.15s" }}
+                    onMouseEnter={e => e.currentTarget.style.background = "#f5f3ff"}
+                    onMouseLeave={e => e.currentTarget.style.background = idx % 2 === 0 ? "white" : "#fafcff"}
+                  >
+                    <td style={{ padding: "12px 14px", fontFamily: "monospace", fontSize: 12.5, color: "#64748b" }}>
+                      {withdrawal.id}
+                    </td>
+                    <td style={{ padding: "12px 14px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <div style={{ width: 26, height: 26, borderRadius: 6, background: "#e0e7ff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <User size={13} color="#6366f1" />
+                        </div>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: "#1e3a5f" }}>{withdrawal.userName}</span>
+                      </div>
+                    </td>
+                    <td style={{ padding: "12px 14px", fontSize: 13, fontWeight: 700, color: "#1e3a5f" }}>
+                      {formatCurrency(withdrawal.amount)}
+                    </td>
+                    <td style={{ padding: "12px 14px" }}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <CreditCard size={12} color="#94a3b8" />
+                          <span style={{ fontSize: 12.5, color: "#334155" }}>{withdrawal.bankAccount}</span>
+                        </div>
+                        <span style={{ fontSize: 11, color: "#94a3b8" }}>{withdrawal.bankName}</span>
+                      </div>
+                    </td>
+                    <td style={{ padding: "12px 14px" }}>{getStatusBadge(withdrawal.status)}</td>
+                    <td style={{ padding: "12px 14px", fontSize: 12.5, color: "#64748b" }}>
+                      {formatDate(withdrawal.requestDate)}
+                    </td>
+                    <td style={{ padding: "12px 14px" }}>
+                      <div style={{ display: "flex", gap: 6 }}>
+                        {withdrawal.status === "pending" && (
+                          <>
+                            <button
+                              style={{ padding: "4px 8px", borderRadius: 6, border: "1px solid #a7f3d0", background: "#f0fdf4", color: "#10b981", fontSize: 11, display: "flex", alignItems: "center", gap: 4, cursor: "pointer", transition: "all 0.15s" }}
+                              onMouseEnter={e => { e.currentTarget.style.background = "#d1fae5"; }}
+                              onMouseLeave={e => { e.currentTarget.style.background = "#f0fdf4"; }}
+                            >
+                              <CheckCircle size={12} /> Approve
+                            </button>
+                            <button
+                              style={{ padding: "4px 8px", borderRadius: 6, border: "1px solid #fecaca", background: "#fef2f2", color: "#ef4444", fontSize: 11, display: "flex", alignItems: "center", gap: 4, cursor: "pointer", transition: "all 0.15s" }}
+                              onMouseEnter={e => { e.currentTarget.style.background = "#fee2e2"; }}
+                              onMouseLeave={e => { e.currentTarget.style.background = "#fef2f2"; }}
+                            >
+                              <XCircle size={12} /> Reject
+                            </button>
+                          </>
+                        )}
+                        <button
+                          style={{ width: 28, height: 28, borderRadius: 6, border: "1.5px solid #e2e8f0", background: "transparent", color: "#64748b", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "all 0.15s" }}
+                          onMouseEnter={e => { e.currentTarget.style.background = "#f1f5f9"; e.currentTarget.style.color = "#1e3a5f"; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#64748b"; }}
+                        >
+                          <MoreHorizontal size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

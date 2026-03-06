@@ -36,6 +36,7 @@ import {
 } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Badge } from "../components/ui/badge";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 import {
   Select,
   SelectContent,
@@ -387,178 +388,172 @@ const CouponsShadcn = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-5">
+      {/* Page Header */}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 6 }}>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Coupons Manager</h1>
-          <p className="text-gray-500 mt-1">
-            Manage discount coupons and promotional codes
-          </p>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+            <div style={{ width: 28, height: 28, borderRadius: 8, background: "linear-gradient(135deg,#f59e0b,#d97706)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Ticket size={14} color="white" />
+            </div>
+            <h1 style={{ margin: 0, fontSize: 21, fontWeight: 800, color: "#1e3a5f", letterSpacing: "-0.4px" }}>Coupons Manager</h1>
+          </div>
+          <p style={{ margin: 0, fontSize: 13, color: "#64748b" }}>Manage discount coupons and promotional codes</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+          <button
             onClick={loadCoupons}
             disabled={loading}
-            className="gap-2"
+            style={{ height: 36, padding: "0 14px", borderRadius: 9, border: "1.5px solid #e0e7ff", background: "#f8fafc", fontSize: 13, fontWeight: 600, color: "#64748b", display: "flex", alignItems: "center", gap: 6, cursor: loading ? "not-allowed" : "pointer" }}
           >
-            <RotateCcw
-              className={cn("h-4 w-4", loading && "animate-spin")}
-            />
+            <RotateCcw size={14} className={loading ? "animate-spin" : ""} />
             Refresh
-          </Button>
-          <Button onClick={handleCreate} className="gap-2">
-            <Plus className="h-4 w-4" />
+          </button>
+          <button
+            onClick={handleCreate}
+            style={{ height: 36, padding: "0 16px", borderRadius: 9, border: "none", background: "#3b82f6", fontSize: 13, fontWeight: 600, color: "white", display: "flex", alignItems: "center", gap: 6, cursor: "pointer", boxShadow: "0 2px 4px rgba(59,130,246,0.2)" }}
+          >
+            <Plus size={14} />
             Create Coupon
-          </Button>
+          </button>
         </div>
       </div>
 
       {/* Filters */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search coupons by name, code, or description..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder="Filter by type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="Generic">Generic</SelectItem>
-                <SelectItem value="Targeted">Targeted</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Coupons List */}
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+      <div className="admin-card" style={{ padding: "14px 18px", marginBottom: 16, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+        <div style={{ flex: 1, minWidth: 220, position: "relative" }}>
+          <Search size={13} style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "#93c5fd" }} />
+          <input
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            placeholder="Search coupons by name, code, or description..."
+            style={{ width: "100%", paddingLeft: 30, paddingRight: 12, height: 36, borderRadius: 9, border: "1.5px solid #bfdbfe", background: "#f0f7ff", fontSize: 12.5, color: "#1e3a5f", outline: "none", fontFamily: "Inter,sans-serif", boxSizing: "border-box" }}
+            onFocus={e => { e.currentTarget.style.borderColor = "#3b82f6"; e.currentTarget.style.background = "white"; }}
+            onBlur={e => { e.currentTarget.style.borderColor = "#bfdbfe"; e.currentTarget.style.background = "#f0f7ff"; }}
+          />
         </div>
-      ) : filteredCoupons.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <Ticket className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg">
-              {searchTerm || filterType !== "all"
-                ? "No coupons found matching your filters"
-                : "No coupons created yet"}
+        <Select value={filterType} onValueChange={setFilterType}>
+          <SelectTrigger style={{ width: 160, height: 36, borderRadius: 9, border: "1.5px solid #bfdbfe", background: "white", fontSize: 12.5, fontFamily: "Inter,sans-serif" }}>
+            <SelectValue placeholder="Filter by type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Types</SelectItem>
+            <SelectItem value="Generic">Generic</SelectItem>
+            <SelectItem value="Targeted">Targeted</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Coupons Table */}
+      <div className="admin-card" style={{ padding: 0, overflow: "hidden" }}>
+        {loading ? (
+          <LoadingSpinner message="Loading coupons..." />
+        ) : filteredCoupons.length === 0 ? (
+          <div style={{ padding: "60px 24px", textAlign: "center" }}>
+            <Ticket size={40} style={{ color: "#bfdbfe", margin: "0 auto 12px" }} />
+            <p style={{ fontSize: 15, fontWeight: 600, color: "#1e3a5f" }}>
+              {searchTerm || filterType !== "all" ? "No coupons found matching your filters" : "No coupons created yet"}
             </p>
             {!searchTerm && filterType === "all" && (
-              <Button onClick={handleCreate} className="mt-4">
-                <Plus className="h-4 w-4 mr-2" />
-                Create Your First Coupon
-              </Button>
+              <button
+                onClick={handleCreate}
+                style={{ marginTop: 16, height: 36, padding: "0 16px", borderRadius: 9, border: "1.5px solid #bfdbfe", background: "#f0f7ff", fontSize: 13, fontWeight: 600, color: "#3b82f6", display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer" }}
+              >
+                <Plus size={14} /> Create Your First Coupon
+              </button>
             )}
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredCoupons.map((coupon) => (
-            <motion.div
-              key={coupon.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Card className="h-full hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg">{coupon.couponName}</CardTitle>
-                      <CardDescription className="mt-1">
+          </div>
+        ) : (
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 900 }}>
+              <thead>
+                <tr style={{ background: "#f8fbff", borderBottom: "1.5px solid #e0f2fe" }}>
+                  {["Name", "Code", "Type", "Value", "Usage", "Expires", "Visibility", "Actions"].map(h => (
+                    <th key={h} style={{ padding: "11px 14px", fontSize: 10.5, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.5px", textAlign: "left", whiteSpace: "nowrap" }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredCoupons.map((coupon, idx) => (
+                  <tr
+                    key={coupon.id}
+                    style={{ borderBottom: "1px solid #f0f7ff", background: idx % 2 === 0 ? "white" : "#fafcff", transition: "background 0.15s", opacity: isExpired(coupon.couponExpiry) ? 0.6 : 1 }}
+                    onMouseEnter={e => e.currentTarget.style.background = "#f5f3ff"}
+                    onMouseLeave={e => e.currentTarget.style.background = idx % 2 === 0 ? "white" : "#fafcff"}
+                  >
+                    <td style={{ padding: "12px 14px" }}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: "#1e3a5f" }}>{coupon.couponName}</span>
+                        <span style={{ fontSize: 11, color: "#64748b" }}>{coupon.couponDescription}</span>
+                      </div>
+                    </td>
+                    <td style={{ padding: "12px 14px" }}>
+                      <span style={{ fontSize: 12.5, fontFamily: "monospace", padding: "3px 8px", background: "#f1f5f9", borderRadius: 4, fontWeight: 600, color: "#334155" }}>
                         {coupon.couponCode}
-                      </CardDescription>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEdit(coupon)}
-                        className="h-8 w-8"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(coupon)}
-                        className="h-8 w-8 text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <p className="text-sm text-gray-600">
-                      {coupon.couponDescription}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <Badge
-                        variant={
-                          coupon.couponType === "Generic"
-                            ? "default"
-                            : "secondary"
-                        }
-                      >
+                      </span>
+                    </td>
+                    <td style={{ padding: "12px 14px" }}>
+                      <Badge variant={coupon.couponType === "Generic" ? "default" : "secondary"} style={{ fontSize: 10.5, padding: "0px 6px" }}>
                         {coupon.couponType}
                       </Badge>
-                      {isExpired(coupon.couponExpiry) && (
-                        <Badge variant="destructive">Expired</Badge>
+                      {coupon.couponType === "Targeted" && (
+                        <div style={{ fontSize: 10, color: "#64748b", marginTop: 4 }}>
+                          D: {coupon.targetedDoctorIds?.length || 0} | P: {coupon.targetedUserIds?.length || 0}
+                        </div>
                       )}
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div>
-                        <span className="text-gray-500">Value:</span>
-                        <span className="ml-2 font-semibold">
-                          ₹{coupon.couponValue}
-                        </span>
+                    </td>
+                    <td style={{ padding: "12px 14px", fontSize: 13, fontWeight: 700, color: "#10b981" }}>
+                      ₹{coupon.couponValue}
+                    </td>
+                    <td style={{ padding: "12px 14px", fontSize: 12.5, color: "#334155", fontWeight: 500 }}>
+                      {coupon.currentUsageCount || 0} / {coupon.maxUsageLimit || 0}
+                    </td>
+                    <td style={{ padding: "12px 14px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, color: isExpired(coupon.couponExpiry) ? "#ef4444" : "#64748b", fontSize: 12.5 }}>
+                        {isExpired(coupon.couponExpiry) ? <AlertCircle size={12} /> : <Calendar size={12} />}
+                        {formatDate(coupon.couponExpiry)}
                       </div>
-                      <div>
-                        <span className="text-gray-500">Usage:</span>
-                        <span className="ml-2 font-semibold">
-                          {coupon.currentUsageCount || 0}/
-                          {coupon.maxUsageLimit || 0}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <Calendar className="h-4 w-4" />
-                      <span>Expires: {formatDate(coupon.couponExpiry)}</span>
-                    </div>
-                    {coupon.couponType === "Targeted" && (
-                      <div className="text-sm text-gray-500">
-                        <div>
-                          Doctors: {coupon.targetedDoctorIds?.length || 0}
+                    </td>
+                    <td style={{ padding: "12px 14px" }}>
+                      {coupon.tray_visibility !== false ? (
+                        <div style={{ display: "flex", alignItems: "center", gap: 4, color: "#10b981", fontSize: 11, fontWeight: 600 }}>
+                          <CheckCircle size={12} /> Visible
                         </div>
-                        <div>
-                          Patients: {coupon.targetedUserIds?.length || 0}
+                      ) : (
+                        <div style={{ display: "flex", alignItems: "center", gap: 4, color: "#94a3b8", fontSize: 11, fontWeight: 600 }}>
+                          <X size={12} /> Hidden
                         </div>
+                      )}
+                    </td>
+                    <td style={{ padding: "12px 14px" }}>
+                      <div style={{ display: "flex", gap: 6 }}>
+                        <button
+                          onClick={() => handleEdit(coupon)}
+                          style={{ width: 26, height: 26, borderRadius: 6, border: "1px solid #bfdbfe", background: "#eff6ff", color: "#2563eb", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "all 0.15s" }}
+                          onMouseEnter={e => { e.currentTarget.style.background = "#dbeafe"; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = "#eff6ff"; }}
+                          title="Edit"
+                        >
+                          <Edit size={12} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(coupon)}
+                          style={{ width: 26, height: 26, borderRadius: 6, border: "1px solid #fecaca", background: "#fef2f2", color: "#ef4444", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "all 0.15s" }}
+                          onMouseEnter={e => { e.currentTarget.style.background = "#fee2e2"; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = "#fef2f2"; }}
+                          title="Delete"
+                        >
+                          <Trash2 size={12} />
+                        </button>
                       </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {/* Create/Edit Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
