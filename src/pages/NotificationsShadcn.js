@@ -27,6 +27,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Badge } from "../components/ui/badge";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 import { sendNotificationToAll, getNotificationHistory, saveNotificationToFirestore } from "../services/notificationService";
 import { cn } from "../lib/utils";
 
@@ -106,12 +107,12 @@ const NotificationsShadcn = () => {
         }
 
         showToast("Success", result.message || "Notification sent successfully to all devices", "success");
-        
+
         // Reset form
         setTitle("");
         setMessage("");
         setTarget("all");
-        
+
         // Reload history and switch to history tab
         setTimeout(() => {
           loadNotificationHistory();
@@ -130,9 +131,9 @@ const NotificationsShadcn = () => {
         // Show detailed error message
         const errorMsg = result.error || "Failed to send notification";
         showToast(
-          "Error Sending Notification", 
-          errorMsg.includes("Cloud Function is not accessible") 
-            ? errorMsg 
+          "Error Sending Notification",
+          errorMsg.includes("Cloud Function is not accessible")
+            ? errorMsg
             : `Failed to send notification: ${errorMsg}`,
           "destructive"
         );
@@ -197,12 +198,17 @@ const NotificationsShadcn = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-5">
+      {/* Page Header */}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 6 }}>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Notifications</h1>
-          <p className="text-gray-500 mt-1">
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+            <div style={{ width: 28, height: 28, borderRadius: 8, background: "linear-gradient(135deg,#8b5cf6,#6d28d9)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Bell size={14} color="white" />
+            </div>
+            <h1 style={{ margin: 0, fontSize: 21, fontWeight: 800, color: "#1e3a5f", letterSpacing: "-0.4px" }}>Notifications</h1>
+          </div>
+          <p style={{ margin: 0, fontSize: 13, color: "#64748b" }}>
             Send push notifications to all devices and view history
           </p>
         </div>
@@ -210,234 +216,194 @@ const NotificationsShadcn = () => {
 
       {/* Toast Notification */}
       {toast && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-        >
-          <Alert
-            variant={toast.variant === "destructive" ? "destructive" : "default"}
-            className={toast.variant === "success" ? "bg-green-50 border-green-200" : ""}
-          >
-            {toast.variant === "success" ? (
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-            ) : (
-              <AlertCircle className="h-4 w-4 text-red-400" />
-            )}
-            <AlertTitle className={toast.variant === "success" ? "text-green-900" : ""}>
-              {toast.title}
-            </AlertTitle>
-            <AlertDescription className={toast.variant === "success" ? "text-green-700" : ""}>
-              {toast.description}
-            </AlertDescription>
-          </Alert>
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+          <div style={{ padding: "12px 16px", borderRadius: 10, background: toast.variant === "success" ? "#ecfdf5" : "#fef2f2", border: `1px solid ${toast.variant === "success" ? "#a7f3d0" : "#fecaca"}`, color: toast.variant === "success" ? "#065f46" : "#ef4444", fontSize: 13, display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 16 }}>
+            {toast.variant === "success" ? <CheckCircle2 size={16} style={{ marginTop: 2 }} /> : <AlertCircle size={16} style={{ marginTop: 2 }} />}
+            <div>
+              <strong style={{ display: "block", marginBottom: 2 }}>{toast.title}</strong>
+              <span style={{ opacity: 0.9 }}>{toast.description}</span>
+            </div>
+          </div>
         </motion.div>
       )}
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="send" className="flex items-center space-x-2">
-            <Send className="h-4 w-4" />
-            <span>Send Notification</span>
+        <TabsList style={{ background: "#f0f7ff", padding: 4, borderRadius: 10 }}>
+          <TabsTrigger value="send" style={{ borderRadius: 8, fontSize: 13, fontWeight: 600 }} className="flex items-center space-x-2 data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm">
+            <Send size={14} /> <span>Send Notification</span>
           </TabsTrigger>
-          <TabsTrigger value="history" className="flex items-center space-x-2">
-            <History className="h-4 w-4" />
-            <span>History</span>
+          <TabsTrigger value="history" style={{ borderRadius: 8, fontSize: 13, fontWeight: 600 }} className="flex items-center space-x-2 data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm">
+            <History size={14} /> <span>History</span>
           </TabsTrigger>
         </TabsList>
 
         {/* Send Tab */}
         <TabsContent value="send">
-          <Card>
-            <CardHeader>
-              <CardTitle>Send Push Notification</CardTitle>
-              <CardDescription>
-                Broadcast notifications to all users, doctors, or patients
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Target Selection */}
-                <div className="space-y-2">
-                  <Label htmlFor="target">Target Audience *</Label>
-                  <Select value={target} onValueChange={setTarget}>
-                    <SelectTrigger id="target">
-                      <SelectValue placeholder="Select target audience" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">
-                        <div className="flex items-center space-x-2">
-                          <Users className="h-4 w-4" />
-                          <span>All Users</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="doctors">
-                        <div className="flex items-center space-x-2">
-                          <UserCheck className="h-4 w-4" />
-                          <span>Doctors Only</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="patients">
-                        <div className="flex items-center space-x-2">
-                          <User className="h-4 w-4" />
-                          <span>Patients Only</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-gray-500">
-                    {target === "all" && "Send to all doctors and patients"}
-                    {target === "doctors" && "Send to all doctors only"}
-                    {target === "patients" && "Send to all patients only"}
-                  </p>
-                </div>
+          <div className="admin-card" style={{ padding: 24 }}>
+            <div style={{ marginBottom: 24 }}>
+              <h2 style={{ fontSize: 17, fontWeight: 700, color: "#1e3a5f", margin: "0 0 4px 0" }}>Send Push Notification</h2>
+              <p style={{ fontSize: 13, color: "#64748b", margin: 0 }}>Broadcast notifications to all users, doctors, or patients</p>
+            </div>
 
-                {/* Title */}
-                <div className="space-y-2">
-                  <Label htmlFor="title">Title *</Label>
-                  <Input
-                    id="title"
-                    placeholder="Enter notification title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                    maxLength={100}
-                  />
-                  <p className="text-xs text-gray-500">
-                    {title.length}/100 characters
-                  </p>
-                </div>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Target Selection */}
+              <div className="space-y-2">
+                <Label htmlFor="target" style={{ fontSize: 13, fontWeight: 600, color: "#334155" }}>Target Audience <span style={{ color: "#ef4444" }}>*</span></Label>
+                <Select value={target} onValueChange={setTarget}>
+                  <SelectTrigger id="target" style={{ borderRadius: 9, border: "1.5px solid #bfdbfe", background: "#f8fbff" }}>
+                    <SelectValue placeholder="Select target audience" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">
+                      <div className="flex items-center space-x-2"><Users size={14} /><span>All Users</span></div>
+                    </SelectItem>
+                    <SelectItem value="doctors">
+                      <div className="flex items-center space-x-2"><UserCheck size={14} /><span>Doctors Only</span></div>
+                    </SelectItem>
+                    <SelectItem value="patients">
+                      <div className="flex items-center space-x-2"><User size={14} /><span>Patients Only</span></div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <p style={{ fontSize: 11.5, color: "#94a3b8", margin: 0 }}>
+                  {target === "all" && "Send to all doctors and patients"}
+                  {target === "doctors" && "Send to all doctors only"}
+                  {target === "patients" && "Send to all patients only"}
+                </p>
+              </div>
 
-                {/* Message */}
-                <div className="space-y-2">
-                  <Label htmlFor="message">Message *</Label>
-                  <Textarea
-                    id="message"
-                    placeholder="Enter notification message"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    required
-                    rows={6}
-                    maxLength={500}
-                  />
-                  <p className="text-xs text-gray-500">
-                    {message.length}/500 characters
-                  </p>
-                </div>
+              {/* Title */}
+              <div className="space-y-2">
+                <Label htmlFor="title" style={{ fontSize: 13, fontWeight: 600, color: "#334155" }}>Title <span style={{ color: "#ef4444" }}>*</span></Label>
+                <Input
+                  id="title"
+                  placeholder="Enter notification title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                  maxLength={100}
+                  style={{ borderRadius: 9, border: "1.5px solid #bfdbfe", background: "#f8fbff", fontSize: 13 }}
+                  onFocus={e => e.currentTarget.style.background = "white"}
+                  onBlur={e => e.currentTarget.style.background = "#f8fbff"}
+                />
+                <p style={{ fontSize: 11.5, color: "#94a3b8", margin: 0, textAlign: "right" }}>{title.length}/100</p>
+              </div>
 
-                {/* Info Box */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex items-start space-x-2">
-                    <Bell className="h-5 w-5 text-blue-600 mt-0.5" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-blue-900">
-                        Notification Preview
-                      </p>
-                      <p className="text-xs text-blue-700 mt-1">
-                        This notification will be sent to all devices with valid
-                        FCM tokens. Users will receive this as a push notification
-                        on their mobile devices. The notification will be saved
-                        to Firestore for history tracking.
-                      </p>
-                    </div>
+              {/* Message */}
+              <div className="space-y-2">
+                <Label htmlFor="message" style={{ fontSize: 13, fontWeight: 600, color: "#334155" }}>Message <span style={{ color: "#ef4444" }}>*</span></Label>
+                <Textarea
+                  id="message"
+                  placeholder="Enter notification message"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  required
+                  rows={4}
+                  maxLength={500}
+                  style={{ borderRadius: 9, border: "1.5px solid #bfdbfe", background: "#f8fbff", fontSize: 13, resize: "none" }}
+                  onFocus={e => e.currentTarget.style.background = "white"}
+                  onBlur={e => e.currentTarget.style.background = "#f8fbff"}
+                />
+                <p style={{ fontSize: 11.5, color: "#94a3b8", margin: 0, textAlign: "right" }}>{message.length}/500</p>
+              </div>
+
+              {/* Info Box */}
+              <div style={{ background: "#eff6ff", border: "1px dashed #93c5fd", borderRadius: 10, padding: 16 }}>
+                <div style={{ display: "flex", gap: 12 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: "#dbeafe", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <Bell size={16} color="#2563eb" />
+                  </div>
+                  <div>
+                    <h4 style={{ margin: "0 0 4px 0", fontSize: 13, fontWeight: 700, color: "#1e3a5f" }}>Notification Preview</h4>
+                    <p style={{ margin: 0, fontSize: 12, color: "#475569", lineHeight: 1.5 }}>
+                      This notification will be sent to all devices with valid FCM tokens matching your target audience. Users will receive this as a push notification. It will also be logged in the History tab.
+                    </p>
                   </div>
                 </div>
+              </div>
 
-                {/* Submit Button */}
-                <Button
-                  type="submit"
-                  disabled={isSending || !title.trim() || !message.trim()}
-                  className="w-full"
-                  size="lg"
-                >
-                  {isSending ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Sending Notification...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="h-4 w-4 mr-2" />
-                      Send Notification
-                    </>
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={isSending || !title.trim() || !message.trim()}
+                style={{ width: "100%", height: 44, borderRadius: 9, border: "none", background: isSending || !title.trim() || !message.trim() ? "#94a3b8" : "#3b82f6", color: "white", fontSize: 14, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, cursor: isSending || !title.trim() || !message.trim() ? "not-allowed" : "pointer", transition: "background 0.2s" }}
+              >
+                {isSending ? (
+                  <><Loader2 size={16} className="animate-spin" /> Sending...</>
+                ) : (
+                  <><Send size={16} /> Broadcast Notification</>
+                )}
+              </button>
+            </form>
+          </div>
         </TabsContent>
 
         {/* History Tab */}
         <TabsContent value="history">
-          <Card>
-            <CardHeader>
-              <CardTitle>Notification History</CardTitle>
-              <CardDescription>
-                View all sent notifications and their status
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {loadingHistory ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-                </div>
-              ) : notificationHistory.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <History className="h-12 w-12 text-gray-300 mb-4" />
-                  <p className="text-gray-500 font-medium">No notifications yet</p>
-                  <p className="text-sm text-gray-400 mt-1">
-                    Send your first notification to see history here
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {notificationHistory.map((notification) => (
-                    <motion.div
-                      key={notification.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center space-x-2">
-                          {getTargetIcon(notification.target || "all")}
-                          <span className="text-sm font-medium text-gray-600">
+          <div className="admin-card" style={{ padding: 0, overflow: "hidden" }}>
+            <div style={{ padding: "20px 24px", borderBottom: "1.5px solid #e0f2fe", background: "#f8fbff" }}>
+              <h2 style={{ fontSize: 17, fontWeight: 700, color: "#1e3a5f", margin: "0 0 4px 0" }}>Notification History</h2>
+              <p style={{ fontSize: 13, color: "#64748b", margin: 0 }}>View previously sent notifications and their delivery status</p>
+            </div>
+
+            {loadingHistory ? (
+              <LoadingSpinner message="Loading notification history..." />
+            ) : notificationHistory.length === 0 ? (
+              <div style={{ padding: "60px 24px", textAlign: "center" }}>
+                <History size={40} style={{ color: "#bfdbfe", margin: "0 auto 12px" }} />
+                <p style={{ fontSize: 15, fontWeight: 600, color: "#1e3a5f" }}>No notifications yet</p>
+                <p style={{ fontSize: 12.5, color: "#94a3b8" }}>Send your first notification to see history here.</p>
+              </div>
+            ) : (
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 700 }}>
+                  <thead>
+                    <tr style={{ background: "#f0f7ff", borderBottom: "1px solid #bfdbfe" }}>
+                      {["Date Sent", "Target", "Notification", "Status", "Recipients"].map(h => (
+                        <th key={h} style={{ padding: "10px 16px", fontSize: 11, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.5px", textAlign: "left" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {notificationHistory.map((notification, idx) => (
+                      <tr
+                        key={notification.id}
+                        style={{ borderBottom: "1px solid #f0f7ff", background: idx % 2 === 0 ? "white" : "#fafcff" }}
+                      >
+                        <td style={{ padding: "14px 16px", fontSize: 12.5, color: "#64748b" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <Clock size={12} /> {formatDate(notification.createdAt)}
+                          </div>
+                        </td>
+                        <td style={{ padding: "14px 16px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, fontWeight: 600, color: "#475569", background: "#f1f5f9", padding: "4px 8px", borderRadius: 6, width: "fit-content" }}>
+                            {getTargetIcon(notification.target || "all")}
                             {getTargetLabel(notification.target || "all")}
-                          </span>
-                        </div>
-                        <div className="flex items-center space-x-2">
+                          </div>
+                        </td>
+                        <td style={{ padding: "14px 16px", maxWidth: 300 }}>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: "#1e3a5f", marginBottom: 2 }}>{notification.title}</div>
+                          <div style={{ fontSize: 12, color: "#64748b", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{notification.message}</div>
+                        </td>
+                        <td style={{ padding: "14px 16px" }}>
                           {getStatusBadge(notification.status)}
-                          <span className="text-xs text-gray-400 flex items-center space-x-1">
-                            <Clock className="h-3 w-3" />
-                            <span>{formatDate(notification.createdAt)}</span>
-                          </span>
-                        </div>
-                      </div>
-                      <h4 className="font-semibold text-gray-900 mb-2">
-                        {notification.title}
-                      </h4>
-                      <p className="text-sm text-gray-600 mb-2">
-                        {notification.message}
-                      </p>
-                      {notification.recipientsCount !== undefined && (
-                        <p className="text-xs text-gray-500">
-                          Sent to {notification.recipientsCount} device(s)
-                        </p>
-                      )}
-                      {notification.error && (
-                        <div className="mt-2">
-                          <p className="text-xs text-red-600">
-                            Error: {notification.error}
-                          </p>
-                        </div>
-                      )}
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                          {notification.error && (
+                            <div style={{ fontSize: 10, color: "#ef4444", marginTop: 4, maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={notification.error}>
+                              Error: {notification.error}
+                            </div>
+                          )}
+                        </td>
+                        <td style={{ padding: "14px 16px", fontSize: 12.5, fontWeight: 600, color: "#334155" }}>
+                          {notification.recipientsCount !== undefined ? notification.recipientsCount : "-"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </TabsContent>
       </Tabs>
     </div>

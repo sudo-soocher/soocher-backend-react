@@ -10,6 +10,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useAuthContext } from "../../context/AuthContext";
+import LoadingSpinner from "../common/LoadingSpinner";
 
 // shadcn components
 import { Button } from "../ui/button";
@@ -210,11 +211,11 @@ const LoginFormShadcn = ({ onShowSignup }) => {
                         key="loader"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2 }}
                         className="flex items-center space-x-2"
                       >
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <div style={{ transform: "scale(0.55)", transformOrigin: "center", marginRight: -8, marginLeft: -8, marginTop: -32, marginBottom: -32 }}>
+                          <LoadingSpinner size="small" message="" />
+                        </div>
                         <span>Signing in...</span>
                       </motion.div>
                     ) : (
@@ -283,7 +284,7 @@ const LoginFormShadcn = ({ onShowSignup }) => {
           }}
         />
       </motion.div>
-    </div>
+    </div >
   );
 };
 

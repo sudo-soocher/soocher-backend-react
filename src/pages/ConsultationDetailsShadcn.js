@@ -138,21 +138,7 @@ const ConsultationDetailsShadcn = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="flex flex-col items-center justify-center p-8">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Loading Consultation Details
-            </h3>
-            <p className="text-gray-600 text-center">
-              Fetching consultation data from Soocher
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <LoadingSpinner fullHeight message="Loading Consultation Details..." />;
   }
 
   if (error) {
@@ -521,10 +507,10 @@ const ConsultationDetailsShadcn = () => {
                       {consultation.doctorInRoom && consultation.patientInRoom
                         ? "Both participants in room"
                         : consultation.doctorInRoom
-                        ? "Doctor in room"
-                        : consultation.patientInRoom
-                        ? "Patient in room"
-                        : "Waiting for participants"}
+                          ? "Doctor in room"
+                          : consultation.patientInRoom
+                            ? "Patient in room"
+                            : "Waiting for participants"}
                     </p>
                   </div>
                   <div className="space-y-2">
