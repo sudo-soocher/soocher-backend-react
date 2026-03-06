@@ -11,7 +11,10 @@ import {
   doc,
   getDoc,
   updateDoc,
+  setDoc,
 } from "firebase/firestore";
+import { v4 as uuidv4 } from "uuid";
+import { sendBookingNotifications } from "./notificationService";
 
 class ConsultationService {
   constructor() {
@@ -397,6 +400,98 @@ class ConsultationService {
       };
     } catch (error) {
       console.error("Error fetching consultations by date:", error);
+      throw error;
+    }
+  }
+
+  // Create a new consultation
+  async createConsultation(consultationData) {
+    try {
+      const {
+        patientId,
+        patientName,
+        doctorId,
+        doctorName,
+        doctorDetails,
+        consultationTime,
+      } = consultationData;
+
+      // Validate required fields
+      if (!patientId || !doctorId || !consultationTime) {
+        throw new Error("Patient ID, Doctor ID, and Consultation Time are required");
+      }
+
+      // Generate UUID v4 for consultation ID (matching app format)
+      const consultationId = uuidv4();
+      
+      // Generate UUID v4 for chat ID (matching app format)
+      const chatId = uuidv4();
+
+      // Calculate expiration times
+      // Use 55 minutes for Psychology doctors, 15 minutes for others
+      let expirationMinutes = 15; // Default: 15 minutes for most doctors
+
+      if (doctorDetails && doctorDetails.specialty) {
+        const specialty = doctorDetails.specialty.toLowerCase();
+        if (specialty.includes("psychology")) {
+          expirationMinutes = 55; // 55 minutes for Psychology doctors
+        }
+      }
+
+      const consultationTimeMillis = consultationTime.getTime();
+      const consultationExpiration = consultationTimeMillis + expirationMinutes * 60 * 1000;
+      const chatExpiration = consultationExpiration + 7 * 24 * 60 * 60 * 1000; // 7 days after consultation expiration
+
+      // Create consultation document with UUID v4 as document ID
+      const consultationDocRef = doc(db, this.collectionName, consultationId);
+      const newConsultation = {
+        consultationId: consultationId, // Store the ID in the document as well
+        chatId: chatId, // Store chat ID
+        participants: [patientId, doctorId],
+        consultationTime: consultationTimeMillis,
+        consultationExpiration: consultationExpiration,
+        chatExpiration: chatExpiration,
+        doctorId: doctorId,
+        doctorName: doctorName || "",
+        doctorDetails: doctorDetails || null,
+        patientName: patientName || null,
+        videoConsultDone: false,
+        cancelledByDoctor: false,
+        doctorInRoom: false,
+        patientInRoom: false,
+        createdAt: new Date().getTime(),
+        lastModified: new Date().getTime(),
+      };
+
+      // Use setDoc with specific document ID instead of addDoc
+      await setDoc(consultationDocRef, newConsultation);
+
+      // Send booking confirmation notifications to patient and doctor
+      // This runs asynchronously and doesn't block the booking creation
+      sendBookingNotifications({
+        patientId,
+        patientName: patientName || "Patient",
+        doctorId,
+        doctorName: doctorName || "Doctor",
+        consultationTime: consultationTimeMillis,
+        consultationId,
+      }).then((result) => {
+        if (result.success) {
+          console.log("Booking notifications sent successfully:", result);
+        } else {
+          console.warn("Failed to send booking notifications:", result.error);
+        }
+      }).catch((err) => {
+        console.error("Error sending booking notifications:", err);
+      });
+
+      // Return created consultation
+      return {
+        id: consultationId,
+        ...newConsultation,
+      };
+    } catch (error) {
+      console.error("Error creating consultation:", error);
       throw error;
     }
   }

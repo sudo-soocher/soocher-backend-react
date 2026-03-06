@@ -31,8 +31,12 @@ const formatDoctorName = (name, specialization) => {
     return name;
   }
 
-  // Add Dr. prefix for all other specializations
-  return name.startsWith("Dr. ") ? name : `Dr. ${name}`;
+  // Add Dr. prefix for all other specializations (case-insensitive check)
+  const nameLower = name.toLowerCase();
+  if (nameLower.startsWith("dr. ") || nameLower.startsWith("dr ")) {
+    return name;
+  }
+  return `Dr. ${name}`;
 };
 
 const EditConsultation = () => {
@@ -45,6 +49,7 @@ const EditConsultation = () => {
   const [doctorsLoading, setDoctorsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [bookedTimes, setBookedTimes] = useState([]); // Store booked timeslots
   const [formData, setFormData] = useState({
     consultationTime: null,
     doctorId: "",
@@ -59,6 +64,42 @@ const EditConsultation = () => {
       loadDoctors();
     }
   }, [consultationId]);
+
+  // Load booked consultations for a specific date (excluding current consultation)
+  const loadBookedTimes = async (date) => {
+    if (!date) return;
+    
+    try {
+      const result = await consultationService.getConsultationsByDate(date, 100);
+      if (result && result.consultations) {
+        // Extract consultation times, excluding the current consultation being edited
+        const times = result.consultations
+          .filter(c => {
+            // Exclude current consultation being edited
+            if (c.id === consultationId) return false;
+            // Only exclude if explicitly cancelled
+            const isCancelled = c.cancelledByDoctor === true || c.cancelledByPatient === true;
+            return !isCancelled;
+          })
+          .map(c => {
+            const time = new Date(c.consultationTime);
+            return time;
+          })
+          .filter(t => !isNaN(t.getTime()));
+        
+        setBookedTimes(times);
+      }
+    } catch (error) {
+      console.error("Error loading booked times:", error);
+    }
+  };
+
+  // Handle date change from DateTimePicker
+  const handleDatePickerDateChange = (date) => {
+    if (date && date instanceof Date && !isNaN(date.getTime())) {
+      loadBookedTimes(date);
+    }
+  };
 
   const fetchConsultationDetails = async () => {
     try {
@@ -82,6 +123,11 @@ const EditConsultation = () => {
         doctorName: formattedData.doctorName || "",
         doctorDetails: formattedData.doctorDetails || null,
       });
+      
+      // Load booked times for the consultation date
+      if (consultationTime) {
+        loadBookedTimes(consultationTime);
+      }
     } catch (err) {
       setError(err.message);
       console.error("Error fetching consultation details:", err);
@@ -357,6 +403,8 @@ const EditConsultation = () => {
                   onChange={(date) =>
                     handleInputChange("consultationTime", date)
                   }
+                  onDateChange={handleDatePickerDateChange}
+                  excludeTimes={bookedTimes}
                   placeholder="Select consultation date and time"
                   disabled={saving}
                   error={errors.consultationTime}

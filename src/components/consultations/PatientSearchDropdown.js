@@ -5,36 +5,18 @@ import {
   User,
   Check,
   ChevronDown,
-  Stethoscope,
-  Star,
   MapPin,
+  Phone,
 } from "lucide-react";
-import "./DoctorSearchDropdown.css";
+import "./PatientSearchDropdown.css";
 
-// Helper function to format doctor name with Dr. prefix
-const formatDoctorName = (name, specialization) => {
-  if (!name) return "N/A";
-
-  // Don't add Dr. prefix for Psychology specialty
-  if (specialization && specialization.toLowerCase().includes("psychology")) {
-    return name;
-  }
-
-  // Add Dr. prefix for all other specializations (case-insensitive check)
-  const nameLower = name.toLowerCase();
-  if (nameLower.startsWith("dr. ") || nameLower.startsWith("dr ")) {
-    return name;
-  }
-  return `Dr. ${name}`;
-};
-
-const DoctorSearchDropdown = ({
-  doctors = [],
-  selectedDoctorId,
-  onDoctorSelect,
+const PatientSearchDropdown = ({
+  patients = [],
+  selectedPatientId,
+  onPatientSelect,
   loading = false,
   error = null,
-  placeholder = "Search and select a doctor...",
+  placeholder = "Search and select a patient...",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -42,19 +24,19 @@ const DoctorSearchDropdown = ({
   const dropdownRef = useRef(null);
   const searchInputRef = useRef(null);
 
-  const selectedDoctor = doctors.find(
-    (doctor) => doctor.uid === selectedDoctorId
+  const selectedPatient = patients.find(
+    (patient) => patient.uid === selectedPatientId
   );
 
-  // Filter doctors based on search term
-  const filteredDoctors = doctors.filter((doctor) => {
+  // Filter patients based on search term
+  const filteredPatients = patients.filter((patient) => {
     const searchLower = searchTerm.toLowerCase();
     return (
-      doctor.name?.toLowerCase().includes(searchLower) ||
-      doctor.specialization?.toLowerCase().includes(searchLower) ||
-      doctor.currentCity?.toLowerCase().includes(searchLower) ||
-      doctor.worksAt?.toLowerCase().includes(searchLower) ||
-      doctor.mciNumber?.toLowerCase().includes(searchLower)
+      patient.name?.toLowerCase().includes(searchLower) ||
+      patient.email?.toLowerCase().includes(searchLower) ||
+      patient.phoneNumber?.toLowerCase().includes(searchLower) ||
+      patient.currentCity?.toLowerCase().includes(searchLower) ||
+      patient.currentState?.toLowerCase().includes(searchLower)
     );
   });
 
@@ -73,19 +55,19 @@ const DoctorSearchDropdown = ({
       case "ArrowDown":
         e.preventDefault();
         setHighlightedIndex((prev) =>
-          prev < filteredDoctors.length - 1 ? prev + 1 : 0
+          prev < filteredPatients.length - 1 ? prev + 1 : 0
         );
         break;
       case "ArrowUp":
         e.preventDefault();
         setHighlightedIndex((prev) =>
-          prev > 0 ? prev - 1 : filteredDoctors.length - 1
+          prev > 0 ? prev - 1 : filteredPatients.length - 1
         );
         break;
       case "Enter":
         e.preventDefault();
-        if (highlightedIndex >= 0 && filteredDoctors[highlightedIndex]) {
-          handleDoctorSelect(filteredDoctors[highlightedIndex]);
+        if (highlightedIndex >= 0 && filteredPatients[highlightedIndex]) {
+          handlePatientSelect(filteredPatients[highlightedIndex]);
         }
         break;
       case "Escape":
@@ -96,8 +78,8 @@ const DoctorSearchDropdown = ({
     }
   };
 
-  const handleDoctorSelect = (doctor) => {
-    onDoctorSelect(doctor);
+  const handlePatientSelect = (patient) => {
+    onPatientSelect(patient);
     setIsOpen(false);
     setSearchTerm("");
     setHighlightedIndex(-1);
@@ -132,7 +114,7 @@ const DoctorSearchDropdown = ({
   }, [searchTerm]);
 
   return (
-    <div className="doctor-search-dropdown" ref={dropdownRef}>
+    <div className="patient-search-dropdown" ref={dropdownRef}>
       {/* Trigger Button */}
       <div
         className={`dropdown-trigger ${isOpen ? "open" : ""} ${
@@ -146,38 +128,28 @@ const DoctorSearchDropdown = ({
         aria-haspopup="listbox"
       >
         <div className="trigger-content">
-          {selectedDoctor ? (
-            <div className="selected-doctor">
-              <div className="doctor-avatar">
-                {selectedDoctor.profileImage ? (
+          {selectedPatient ? (
+            <div className="selected-patient">
+              <div className="patient-avatar">
+                {selectedPatient.profileImage ? (
                   <img
-                    src={selectedDoctor.profileImage}
-                    alt={selectedDoctor.name}
-                    className="doctor-profile-image"
+                    src={selectedPatient.profileImage}
+                    alt={selectedPatient.name}
+                    className="patient-profile-image"
                     onError={(e) => {
                       e.target.style.display = "none";
                       e.target.nextSibling.style.display = "flex";
                     }}
                   />
                 ) : null}
-                <User size={16} className="doctor-avatar-fallback" />
+                <User size={16} className="patient-avatar-fallback" />
               </div>
-              <div className="doctor-info">
-                <div className="doctor-name-row">
-                  <span className="doctor-name">
-                    {formatDoctorName(
-                      selectedDoctor.name,
-                      selectedDoctor.specialization
-                    )}
-                  </span>
-                  {selectedDoctor.isAccountVerified && (
-                    <div className="verified-badge-small">
-                      <Check size={8} />
-                    </div>
-                  )}
+              <div className="patient-info">
+                <div className="patient-name-row">
+                  <span className="patient-name">{selectedPatient.name}</span>
                 </div>
-                <span className="doctor-specialty">
-                  {selectedDoctor.specialization}
+                <span className="patient-contact">
+                  {selectedPatient.phoneNumber || selectedPatient.email || "N/A"}
                 </span>
               </div>
             </div>
@@ -210,7 +182,7 @@ const DoctorSearchDropdown = ({
               <input
                 ref={searchInputRef}
                 type="text"
-                placeholder="Search doctors..."
+                placeholder="Search patients..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-input"
@@ -222,7 +194,7 @@ const DoctorSearchDropdown = ({
             {loading && (
               <div className="loading-state">
                 <div className="loading-spinner" />
-                <span>Loading doctors...</span>
+                <span>Loading patients...</span>
               </div>
             )}
 
@@ -234,69 +206,72 @@ const DoctorSearchDropdown = ({
             )}
 
             {/* No Results */}
-            {!loading && !error && filteredDoctors.length === 0 && (
+            {!loading && !error && filteredPatients.length === 0 && (
               <div className="no-results">
                 <User size={24} />
-                <span>No doctors found</span>
+                <span>No patients found</span>
                 <small>Try adjusting your search terms</small>
               </div>
             )}
 
-            {/* Doctor List */}
-            {!loading && !error && filteredDoctors.length > 0 && (
-              <div className="doctor-list" role="listbox">
-                {filteredDoctors.map((doctor, index) => (
+            {/* Patient List */}
+            {!loading && !error && filteredPatients.length > 0 && (
+              <div className="patient-list" role="listbox">
+                {filteredPatients.map((patient, index) => (
                   <motion.div
-                    key={doctor.uid}
-                    className={`doctor-item ${
+                    key={patient.uid}
+                    className={`patient-item ${
                       highlightedIndex === index ? "highlighted" : ""
-                    } ${selectedDoctorId === doctor.uid ? "selected" : ""}`}
-                    onClick={() => handleDoctorSelect(doctor)}
+                    } ${selectedPatientId === patient.uid ? "selected" : ""}`}
+                    onClick={() => handlePatientSelect(patient)}
                     onMouseEnter={() => setHighlightedIndex(index)}
                     role="option"
-                    aria-selected={selectedDoctorId === doctor.uid}
+                    aria-selected={selectedPatientId === patient.uid}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.03 }}
                   >
-                    <div className="doctor-avatar">
-                      {doctor.profileImage ? (
+                    <div className="patient-avatar">
+                      {patient.profileImage ? (
                         <img
-                          src={doctor.profileImage}
-                          alt={doctor.name}
-                          className="doctor-profile-image"
+                          src={patient.profileImage}
+                          alt={patient.name}
+                          className="patient-profile-image"
                           onError={(e) => {
                             e.target.style.display = "none";
                             e.target.nextSibling.style.display = "flex";
                           }}
                         />
                       ) : null}
-                      <User size={16} className="doctor-avatar-fallback" />
+                      <User size={16} className="patient-avatar-fallback" />
                     </div>
-                    <div className="doctor-details">
-                      <div className="doctor-header">
-                        <div className="doctor-name-container">
-                          <span className="doctor-name">
-                            {formatDoctorName(
-                              doctor.name,
-                              doctor.specialization
-                            )}
-                          </span>
-                          {doctor.isAccountVerified && (
-                            <div className="verified-badge">
-                              <Check size={10} />
-                              <span>Verified</span>
+                    <div className="patient-details">
+                      <div className="patient-header">
+                        <div className="patient-name-container">
+                          <span className="patient-name">{patient.name}</span>
+                        </div>
+                        <div className="patient-meta">
+                          {patient.phoneNumber && (
+                            <div className="patient-contact-item">
+                              <Phone size={12} />
+                              <span>{patient.phoneNumber}</span>
+                            </div>
+                          )}
+                          {(patient.currentCity || patient.currentState) && (
+                            <div className="patient-contact-item">
+                              <MapPin size={12} />
+                              <span>
+                                {[patient.currentCity, patient.currentState]
+                                  .filter(Boolean)
+                                  .join(", ")}
+                              </span>
                             </div>
                           )}
                         </div>
-                        <div className="doctor-specialty">
-                          <Stethoscope size={12} />
-                          <span>{doctor.specialization}</span>
-                        </div>
                       </div>
                     </div>
-                    <div className="doctor-actions">
-                      {selectedDoctorId === doctor.uid && (
+                    <div className="patient-actions">
+                      {selectedPatientId === patient.uid && (
                         <div className="selected-indicator">
                           <Check size={16} />
                         </div>
@@ -313,4 +288,5 @@ const DoctorSearchDropdown = ({
   );
 };
 
-export default DoctorSearchDropdown;
+export default PatientSearchDropdown;
+

@@ -16,7 +16,10 @@ import {
   ChevronDown,
   CreditCard,
   Ticket,
+  Bell,
+  CalendarPlus,
 } from "lucide-react";
+import ManualBookingDialog from "../consultations/ManualBookingDialog";
 
 // shadcn components
 import { Button } from "../ui/button";
@@ -26,6 +29,7 @@ import { cn } from "../../lib/utils";
 const SidebarShadcn = ({ isMobile, isOpen, onClose }) => {
   const location = useLocation();
   const [expandedItems, setExpandedItems] = useState({});
+  const [showManualBookingDialog, setShowManualBookingDialog] = useState(false);
 
   const menuItems = [
     {
@@ -71,6 +75,7 @@ const SidebarShadcn = ({ isMobile, isOpen, onClose }) => {
         { path: "/consultations/all", label: "All Consultations" },
         { path: "/consultations/active", label: "Active" },
         { path: "/consultations/completed", label: "Completed" },
+        { path: null, label: "Create Booking", isAction: true, icon: CalendarPlus },
       ],
     },
     {
@@ -83,6 +88,12 @@ const SidebarShadcn = ({ isMobile, isOpen, onClose }) => {
       path: "/coupons",
       label: "Coupons Manager",
       icon: Ticket,
+      badge: null,
+    },
+    {
+      path: "/notifications",
+      label: "Notifications",
+      icon: Bell,
       badge: null,
     },
     {
@@ -111,7 +122,7 @@ const SidebarShadcn = ({ isMobile, isOpen, onClose }) => {
   };
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-white border-r border-gray-200">
+    <div className="flex flex-col h-full bg-white border-r border-gray-200 overflow-y-auto">
       {/* Header */}
       <div className="flex items-center justify-between p-6 border-b border-gray-200">
         <div className="flex items-center space-x-3">
@@ -136,7 +147,7 @@ const SidebarShadcn = ({ isMobile, isOpen, onClose }) => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const hasSubmenu = item.submenu && item.submenu.length > 0;
@@ -219,21 +230,44 @@ const SidebarShadcn = ({ isMobile, isOpen, onClose }) => {
                     className="overflow-hidden"
                   >
                     <div className="ml-8 mt-2 space-y-1">
-                      {item.submenu.map((subItem) => (
-                        <Link
-                          key={subItem.path}
-                          to={subItem.path}
-                          onClick={onClose}
-                          className={cn(
-                            "block px-3 py-2 text-sm rounded-md transition-colors",
-                            location.pathname === subItem.path
-                              ? "bg-blue-50 text-blue-700 font-medium"
-                              : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                          )}
-                        >
-                          {subItem.label}
-                        </Link>
-                      ))}
+                      {item.submenu.map((subItem) => {
+                        // Handle action items (like Create Booking) differently
+                        if (subItem.isAction) {
+                          const ActionIcon = subItem.icon || MessageSquare;
+                          return (
+                            <button
+                              key={subItem.label}
+                              onClick={() => {
+                                setShowManualBookingDialog(true);
+                                if (isMobile) onClose();
+                              }}
+                              className={cn(
+                                "w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors text-left",
+                                "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                              )}
+                            >
+                              {ActionIcon && <ActionIcon className="h-4 w-4" />}
+                              {subItem.label}
+                            </button>
+                          );
+                        }
+                        
+                        return (
+                          <Link
+                            key={subItem.path}
+                            to={subItem.path}
+                            onClick={onClose}
+                            className={cn(
+                              "block px-3 py-2 text-sm rounded-md transition-colors",
+                              location.pathname === subItem.path
+                                ? "bg-blue-50 text-blue-700 font-medium"
+                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                            )}
+                          >
+                            {subItem.label}
+                          </Link>
+                        );
+                      })}
                     </div>
                   </motion.div>
                 )}
@@ -267,37 +301,59 @@ const SidebarShadcn = ({ isMobile, isOpen, onClose }) => {
 
   if (isMobile) {
     return (
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              className="fixed inset-0 bg-black bg-opacity-50 z-40"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={onClose}
-            />
-            {/* Sidebar */}
-            <motion.div
-              className="fixed left-0 top-0 h-full w-80 z-50"
-              initial={{ x: -320 }}
-              animate={{ x: 0 }}
-              exit={{ x: -320 }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            >
-              {sidebarContent}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      <>
+        <AnimatePresence>
+          {isOpen && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                className="fixed inset-0 bg-black bg-opacity-50 z-40"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={onClose}
+              />
+              {/* Sidebar */}
+              <motion.div
+                className="fixed left-0 top-0 h-full w-80 z-50"
+                initial={{ x: -320 }}
+                animate={{ x: 0 }}
+                exit={{ x: -320 }}
+                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              >
+                {sidebarContent}
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+        {/* Manual Booking Dialog for mobile */}
+        <ManualBookingDialog
+          open={showManualBookingDialog}
+          onOpenChange={setShowManualBookingDialog}
+          onSuccess={() => {
+            console.log("Manual booking created successfully");
+          }}
+        />
+      </>
     );
   }
 
   return (
-    <div className="hidden md:flex md:w-80 md:flex-col md:fixed md:inset-y-0 md:z-40">
-      {sidebarContent}
-    </div>
+    <>
+      <div className="hidden md:flex md:w-80 md:flex-col md:fixed md:inset-y-0 md:z-40 md:overflow-y-auto">
+        {sidebarContent}
+      </div>
+      {/* Manual Booking Dialog for desktop */}
+      {!isMobile && (
+        <ManualBookingDialog
+          open={showManualBookingDialog}
+          onOpenChange={setShowManualBookingDialog}
+          onSuccess={() => {
+            console.log("Manual booking created successfully");
+          }}
+        />
+      )}
+    </>
   );
 };
 
