@@ -212,3 +212,151 @@ export const getNotificationHistory = async (limitCount = 50) => {
   }
 };
 
+/**
+ * Send booking confirmation notifications to patient and doctor
+ * Patient receives: "Your appointment with Dr. {Doctor Name} on {Date} at {Time} is confirmed."
+ * Doctor receives: "New appointment booked with {Patient Name} on {Date} at {Time}."
+ * 
+ * @param {object} bookingData - Booking information
+ * @param {string} bookingData.patientId - Patient's user ID
+ * @param {string} bookingData.patientName - Patient's name
+ * @param {string} bookingData.doctorId - Doctor's user ID
+ * @param {string} bookingData.doctorName - Doctor's name
+ * @param {number} bookingData.consultationTime - Consultation time in milliseconds
+ * @param {string} bookingData.consultationId - Consultation ID (optional)
+ * @returns {Promise<{success: boolean, message?: string, error?: string, results?: object}>}
+ */
+export const sendBookingNotifications = async (bookingData) => {
+  try {
+    const {
+      patientId,
+      patientName,
+      doctorId,
+      doctorName,
+      consultationTime,
+      consultationId,
+    } = bookingData;
+
+    // Validate required fields
+    if (!patientId || !doctorId || !consultationTime) {
+      return {
+        success: false,
+        error: "patientId, doctorId, and consultationTime are required",
+      };
+    }    const cloudFunctionUrl = "https://sendbookingnotifications-shl5yc2qhq-uc.a.run.app";    const response = await fetch(cloudFunctionUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        patientId,
+        patientName: patientName || "Patient",
+        doctorId,
+        doctorName: doctorName || "Doctor",
+        consultationTime,
+        consultationId: consultationId || "",
+      }),
+    }).catch((fetchError) => {
+      console.error("Network error calling sendBookingNotifications:", fetchError);
+      throw new Error(
+        `Failed to connect to Cloud Function. Error: ${fetchError.message || 'Network request failed'}`
+      );
+    });
+
+    if (!response.ok) {
+      let errorMessage = `Cloud Function returned status ${response.status}`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorMessage;
+      } catch (e) {
+        const text = await response.text().catch(() => '');
+        if (text) errorMessage = text;
+      }
+      throw new Error(errorMessage);
+    }    const result = await response.json();
+
+    return {
+      success: result.success,
+      message: result.message || "Booking notifications sent",
+      results: result.results,
+    };
+  } catch (error) {
+    console.error("Error sending booking notifications:", error);
+    return {
+      success: false,
+      error: error.message || "Failed to send booking notifications",
+    };
+  }
+};
+
+/**
+ * Send notification to specific user IDs
+ * @param {Array<string>} userIds - Array of user IDs to send notification to
+ * @param {string} title - Notification title
+ * @param {string} message - Notification message
+ * @param {object} data - Additional data payload (optional)
+ * @returns {Promise<{success: boolean, message?: string, error?: string}>}
+ */
+export const sendNotificationToUserIds = async (userIds, title, message, data = {}) => {
+  try {
+    if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+      return {
+        success: false,
+        error: "userIds array is required",
+      };
+    }
+
+    if (!title || !message) {
+      return {
+        success: false,
+        error: "Title and message are required",
+      };
+    }
+
+    const cloudFunctionUrl = "https://sendnotificationtouserids-shl5yc2qhq-uc.a.run.app";
+
+    const response = await fetch(cloudFunctionUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userIds,
+        title,
+        message,
+        data,
+      }),
+    }).catch((fetchError) => {
+      console.error("Network error calling sendNotificationToUserIds:", fetchError);
+      throw new Error(
+        `Failed to connect to Cloud Function. Error: ${fetchError.message || 'Network request failed'}`
+      );
+    });
+
+    if (!response.ok) {
+      let errorMessage = `Cloud Function returned status ${response.status}`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorMessage;
+      } catch (e) {
+        const text = await response.text().catch(() => '');
+        if (text) errorMessage = text;
+      }
+      throw new Error(errorMessage);
+    }
+
+    const result = await response.json();
+
+    return {
+      success: true,
+      message: result.message || "Notification sent successfully",
+      data: result,
+    };
+  } catch (error) {
+    console.error("Error sending notification to user IDs:", error);
+    return {
+      success: false,
+      error: error.message || "Failed to send notification",
+    };
+  }
+};

@@ -20,8 +20,12 @@ const formatDoctorName = (name, specialization) => {
     return name;
   }
 
-  // Add Dr. prefix for all other specializations
-  return name.startsWith("Dr. ") ? name : `Dr. ${name}`;
+  // Add Dr. prefix for all other specializations (case-insensitive check)
+  const nameLower = name.toLowerCase();
+  if (nameLower.startsWith("dr. ") || nameLower.startsWith("dr ")) {
+    return name;
+  }
+  return `Dr. ${name}`;
 };
 
 const DoctorSearchDropdown = ({

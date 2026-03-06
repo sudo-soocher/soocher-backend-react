@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import "react-datepicker/dist/react-datepicker.css";
 import "./DateTimePicker.css";
 
@@ -17,6 +17,8 @@ const DateTimePicker = ({
   timeFormat = "HH:mm",
   dateFormat = "MMM dd, yyyy HH:mm",
   timeIntervals = 15,
+  excludeTimes = [], // Array of Date objects representing booked/unavailable times
+  onDateChange = null, // Callback when date changes (to fetch booked times)
   ...props
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,41 +28,84 @@ const DateTimePicker = ({
   const handleDateChange = (date) => {
     if (!date) return;
     
-    // Check if this is a time selection (same date, different time)
-    const isTimeSelection = selectedDate && 
-                           selectedDate.getDate() === date.getDate() &&
-                           selectedDate.getMonth() === date.getMonth() &&
-                           selectedDate.getFullYear() === date.getFullYear() &&
-                           (selectedDate.getHours() !== date.getHours() || 
-                            selectedDate.getMinutes() !== date.getMinutes());
+    // Ensure date is valid
+    if (!(date instanceof Date) || isNaN(date.getTime())) {
+      console.error('Invalid date received in handleDateChange:', date);
+      return;
+    }
     
-    setSelectedDate(date);
-    onChange(date);
-    
-    // Only close popup if user selected a time (not just a date)
-    if (isTimeSelection) {
-      setIsOpen(false);
-    } else {
-      // Update previousTime for next comparison
-      setPreviousTime(date);
+    try {
+      // Check if this is a time selection (same date, different time)
+      const isTimeSelection = selectedDate && 
+                             selectedDate instanceof Date &&
+                             !isNaN(selectedDate.getTime()) &&
+                             selectedDate.getDate() === date.getDate() &&
+                             selectedDate.getMonth() === date.getMonth() &&
+                             selectedDate.getFullYear() === date.getFullYear() &&
+                             (selectedDate.getHours() !== date.getHours() || 
+                              selectedDate.getMinutes() !== date.getMinutes());
+      
+      // Create a new date object to avoid reference issues, especially for month boundaries
+      const newDate = new Date(date);
+      setSelectedDate(newDate);
+      
+      // Call onChange with valid date
+      if (onChange && typeof onChange === 'function') {
+        onChange(newDate);
+      }
+      
+      // Only close popup if user selected a time (not just a date)
+      if (isTimeSelection) {
+        setIsOpen(false);
+      } else {
+        // Update previousTime for next comparison
+        setPreviousTime(newDate);
+      }
+    } catch (error) {
+      console.error('Error in handleDateChange:', error, date);
     }
   };
 
   const handleDateSelect = (date) => {
     // Track the selected date when user clicks on a date in calendar
     // Don't close popup - let user select time
-    if (date) {
+    if (!date) return;
+    
+    // Ensure date is valid
+    if (!(date instanceof Date) || isNaN(date.getTime())) {
+      console.error('Invalid date received in handleDateSelect:', date);
+      return;
+    }
+    
+    try {
       const selectedDateOnly = new Date(date);
+      
       // Preserve existing time if available, otherwise set to midnight
-      if (value && (value.getHours() !== 0 || value.getMinutes() !== 0)) {
+      if (value && value instanceof Date && !isNaN(value.getTime()) && 
+          (value.getHours() !== 0 || value.getMinutes() !== 0)) {
         selectedDateOnly.setHours(value.getHours(), value.getMinutes(), 0, 0);
       } else {
         selectedDateOnly.setHours(0, 0, 0, 0);
       }
+      
+      // Ensure the resulting date is still valid
+      if (isNaN(selectedDateOnly.getTime())) {
+        console.error('Invalid date after time setting:', selectedDateOnly);
+        return;
+      }
+      
       setSelectedDate(selectedDateOnly);
       setPreviousTime(selectedDateOnly);
+      
+      // Notify parent of date change so they can fetch booked times
+      if (onDateChange && typeof onDateChange === 'function') {
+        onDateChange(selectedDateOnly);
+      }
+      
       // Don't call onChange here - let handleDateChange handle it when onChange fires
       // This prevents double updates and ensures proper time detection
+    } catch (error) {
+      console.error('Error in handleDateSelect:', error, date);
     }
   };
 
@@ -100,7 +145,7 @@ const DateTimePicker = ({
     });
   };
 
-  // Filter out past times - only show times that haven't passed yet
+  // Filter out past times and booked times
   const filterTime = (time) => {
     if (!time) return true;
     
@@ -127,6 +172,28 @@ const DateTimePicker = ({
     timeToCheck.setSeconds(0);
     timeToCheck.setMilliseconds(0);
     
+    // Check if this time is in the excludeTimes list (booked times)
+    if (excludeTimes && excludeTimes.length > 0) {
+      const isExcluded = excludeTimes.some((excludedTime) => {
+        if (!excludedTime || !(excludedTime instanceof Date)) return false;
+        
+        // Compare date, hours, and minutes to ensure we're comparing the same day
+        const sameDate = 
+          excludedTime.getDate() === dateToCheck.getDate() &&
+          excludedTime.getMonth() === dateToCheck.getMonth() &&
+          excludedTime.getFullYear() === dateToCheck.getFullYear();
+        
+        const sameTime = 
+          excludedTime.getHours() === time.getHours() &&
+          excludedTime.getMinutes() === time.getMinutes();
+        
+        return sameDate && sameTime;
+      });
+      if (isExcluded) {
+        return false; // This time is booked, don't show it
+      }
+    }
+    
     // Check if the selected date is today
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -144,7 +211,7 @@ const DateTimePicker = ({
       return isFuture;
     }
     
-    // For future dates, show all times
+    // For future dates, show all times (that aren't excluded)
     return true;
   };
 
@@ -250,95 +317,42 @@ const DateTimePicker = ({
   useEffect(() => {
     if (isOpen) {
       const updateTimeListItems = () => {
-        // Position navigation buttons correctly relative to header
-        const header = document.querySelector('.datepicker-popup .react-datepicker__header--has-time-select') || 
-                       document.querySelector('.datepicker-popup .react-datepicker__header');
-        const currentMonth = document.querySelector('.datepicker-popup .react-datepicker__current-month');
-        
-        // Find all navigation buttons - search in entire popup
-        const allNavButtons = document.querySelectorAll('.datepicker-popup .react-datepicker__navigation');
-        let prevButton = null;
-        let nextButton = null;
-        
-        allNavButtons.forEach((btn) => {
-          if (btn.classList.contains('react-datepicker__navigation--previous')) {
-            prevButton = btn;
-          } else if (btn.classList.contains('react-datepicker__navigation--next')) {
-            nextButton = btn;
-          }
-        });
+        // Always query for fresh references to avoid stale DOM nodes
+        const popup = document.querySelector('.datepicker-popup');
+        if (!popup) return; // Exit early if popup doesn't exist
 
-        if (header) {
-          // Ensure header has relative positioning
-          header.style.position = 'relative';
-          
-          if (prevButton && nextButton) {
-            // Move buttons into the header if they're not already there
-            if (!header.contains(prevButton)) {
-              header.appendChild(prevButton);
-            }
-            if (!header.contains(nextButton)) {
-              header.appendChild(nextButton);
-            }
-
-            // Use simpler percentage-based positioning relative to header center
-            // Previous button: left of center
-            prevButton.style.cssText = `
-              position: absolute !important;
-              left: calc(50% - 70px) !important;
-              right: auto !important;
-              top: 50% !important;
-              transform: translateY(-50%) !important;
-              z-index: 100 !important;
-              display: flex !important;
-              visibility: visible !important;
-              opacity: 1 !important;
-              width: 32px !important;
-              height: 32px !important;
-              background: white !important;
-              border: 1px solid #e5e7eb !important;
-              border-radius: 8px !important;
-              cursor: pointer !important;
-            `;
-
-            // Next button: right of center
-            nextButton.style.cssText = `
-              position: absolute !important;
-              left: calc(50% + 38px) !important;
-              right: auto !important;
-              top: 50% !important;
-              transform: translateY(-50%) !important;
-              z-index: 100 !important;
-              display: flex !important;
-              visibility: visible !important;
-              opacity: 1 !important;
-              width: 32px !important;
-              height: 32px !important;
-              background: white !important;
-              border: 1px solid #e5e7eb !important;
-              border-radius: 8px !important;
-              cursor: pointer !important;
-            `;
-
-            // Hide buttons that appear in wrong locations (outside header)
-            allNavButtons.forEach((btn) => {
-              if (btn !== prevButton && btn !== nextButton) {
-                if (!header.contains(btn)) {
-                  btn.style.display = 'none';
-                  btn.style.visibility = 'hidden';
-                }
-              }
-            });
-          }
-        }
-
-        // Ensure time container has proper width
+        // Ensure time container has proper width and no spacing
         const timeContainer = document.querySelector('.react-datepicker__time-container');
         if (timeContainer) {
           timeContainer.style.width = '240px';
           timeContainer.style.minWidth = '240px';
           timeContainer.style.maxWidth = 'none';
           timeContainer.style.overflow = 'visible';
+          timeContainer.style.margin = '0';
+          timeContainer.style.marginLeft = '0';
+          timeContainer.style.padding = '0';
+        }
+
+        // Remove spacing between month and time containers
+        const monthContainer = document.querySelector('.react-datepicker__month-container');
+        if (monthContainer) {
+          monthContainer.style.margin = '0';
+          monthContainer.style.marginRight = '0';
+          monthContainer.style.padding = '0';
+        }
+
+        // Ensure react-datepicker container has no gap
+        const datepickerContainer = document.querySelector('.datepicker-popup .react-datepicker__container');
+        if (datepickerContainer) {
+          datepickerContainer.style.gap = '0';
+          datepickerContainer.style.margin = '0';
+          datepickerContainer.style.padding = '0';
+        }
+
+        const datepicker = document.querySelector('.datepicker-popup .react-datepicker');
+        if (datepicker) {
+          datepicker.style.gap = '0';
+          datepicker.style.margin = '0';
         }
 
         // Ensure time box and list containers allow overflow
@@ -386,24 +400,57 @@ const DateTimePicker = ({
 
       // Wait for DatePicker to render, then update time items
       // Use multiple timeouts to catch different render phases
-      const timeoutId1 = setTimeout(updateTimeListItems, 50);
-      const timeoutId2 = setTimeout(updateTimeListItems, 200);
-      const timeoutId3 = setTimeout(updateTimeListItems, 500);
+      // Start with longer delays to ensure buttons are rendered by react-datepicker
+      const timeoutId1 = setTimeout(updateTimeListItems, 100);
+      const timeoutId2 = setTimeout(updateTimeListItems, 300);
+      const timeoutId3 = setTimeout(updateTimeListItems, 600);
+      const timeoutId4 = setTimeout(updateTimeListItems, 1000); // Extra delay for button rendering
       
-      // Also update on any DOM changes
-      const observer = new MutationObserver(() => {
-        setTimeout(updateTimeListItems, 50);
+      // Also update on any DOM changes, but be careful not to interfere with React
+      const observer = new MutationObserver((mutations) => {
+        // Only update if the mutations don't involve React removing nodes
+        const hasRemovals = mutations.some(m => m.removedNodes.length > 0);
+        if (!hasRemovals) {
+          setTimeout(updateTimeListItems, 50);
+        } else {
+          // If nodes are being removed, wait a bit longer to let React finish
+          setTimeout(updateTimeListItems, 100);
+        }
       });
       const popup = document.querySelector('.datepicker-popup');
       if (popup) {
-        observer.observe(popup, { childList: true, subtree: true });
+        observer.observe(popup, { 
+          childList: true, 
+          subtree: true,
+          attributes: false // Don't watch attribute changes to reduce interference
+        });
       }
 
       return () => {
+        // Clean up timeouts
         clearTimeout(timeoutId1);
         clearTimeout(timeoutId2);
         clearTimeout(timeoutId3);
-        observer.disconnect();
+        if (typeof timeoutId4 !== 'undefined') clearTimeout(timeoutId4);
+        
+        // Disconnect observer to prevent interference with React's DOM operations
+        if (observer) {
+          observer.disconnect();
+        }
+        
+        // Reset any inline styles we may have applied to prevent stale references
+        // This helps when navigating between months
+        try {
+          const allNavButtons = document.querySelectorAll('.datepicker-popup .react-datepicker__navigation');
+          allNavButtons.forEach((btn) => {
+            if (btn && btn.parentNode) {
+              // Reset positioning to let React handle it naturally
+              btn.style.cssText = '';
+            }
+          });
+        } catch (e) {
+          // Ignore errors during cleanup
+        }
       };
     }
   }, [isOpen, timeIntervals, selectedDate]);
@@ -448,6 +495,37 @@ const DateTimePicker = ({
               disabled={disabled}
               filterTime={filterTime}
               inline
+              renderCustomHeader={({
+                date,
+                decreaseMonth,
+                increaseMonth,
+                prevMonthButtonDisabled,
+                nextMonthButtonDisabled,
+              }) => (
+                <div className="custom-header">
+                  <button
+                    type="button"
+                    className="nav-button nav-button-prev"
+                    onClick={decreaseMonth}
+                    disabled={prevMonthButtonDisabled}
+                    aria-label="Previous month"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <span className="current-month">
+                    {date.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                  </span>
+                  <button
+                    type="button"
+                    className="nav-button nav-button-next"
+                    onClick={increaseMonth}
+                    disabled={nextMonthButtonDisabled}
+                    aria-label="Next month"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              )}
               {...props}
             />
           </div>

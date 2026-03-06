@@ -34,6 +34,7 @@ const ManualBookingDialog = ({ open, onOpenChange, onSuccess }) => {
   const [patientsLoading, setPatientsLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState(null);
+  const [bookedTimes, setBookedTimes] = useState([]); // Store booked timeslots
   const [formData, setFormData] = useState({
     consultationTime: null,
     patientId: "",
@@ -54,6 +55,8 @@ const ManualBookingDialog = ({ open, onOpenChange, onSuccess }) => {
     if (open) {
       loadDoctors();
       loadPatients();
+      // Load booked times for today by default
+      loadBookedTimes(new Date());
       // Reset form when dialog opens
       setFormData({
         consultationTime: null,
@@ -64,8 +67,47 @@ const ManualBookingDialog = ({ open, onOpenChange, onSuccess }) => {
         doctorDetails: null,
       });
       setErrors({});
+      setBookedTimes([]);
     }
   }, [open]);
+
+  // Load booked consultations for a specific date
+  const loadBookedTimes = async (date) => {
+    if (!date) return;
+    
+    try {
+      const result = await consultationService.getConsultationsByDate(date, 100);
+      
+      if (result && result.consultations) {
+        // Extract consultation times and convert to Date objects
+        // Include all non-cancelled consultations
+        const times = result.consultations
+          .filter(c => {
+            // Only exclude if explicitly cancelled
+            const isCancelled = c.cancelledByDoctor === true || c.cancelledByPatient === true;
+            return !isCancelled;
+          })
+          .map(c => {
+            // consultationTime is stored as epoch millis
+            const time = new Date(c.consultationTime);
+            return time;
+          })
+          .filter(t => !isNaN(t.getTime())); // Filter out invalid dates
+        
+        setBookedTimes(times);
+      }
+    } catch (error) {
+      console.error("Error loading booked times:", error);
+      // Don't show error toast, just log it
+    }
+  };
+
+  // Handle date change from DateTimePicker
+  const handleDateChange = (date) => {
+    if (date && date instanceof Date && !isNaN(date.getTime())) {
+      loadBookedTimes(date);
+    }
+  };
 
   const loadDoctors = async () => {
     try {
@@ -304,6 +346,8 @@ const ManualBookingDialog = ({ open, onOpenChange, onSuccess }) => {
             <DateTimePicker
               value={formData.consultationTime}
               onChange={(date) => handleInputChange("consultationTime", date)}
+              onDateChange={handleDateChange}
+              excludeTimes={bookedTimes}
               placeholder="Select consultation date and time"
               disabled={submitting}
               error={errors.consultationTime}

@@ -413,6 +413,11 @@ const Doctors = () => {
     if (doctor?.specialization === "Psychology") {
       return name;
     }
+    // Don't add "Dr." if name already starts with "Dr." or "Dr " (case-insensitive)
+    const nameLower = name.toLowerCase();
+    if (nameLower.startsWith("dr. ") || nameLower.startsWith("dr ")) {
+      return name;
+    }
     return `Dr. ${name}`;
   };
 

@@ -706,3 +706,4 @@ const filtered = allDoctors.filter(doctor =>
 
 This project demonstrates a modern **serverless architecture** where Firebase handles all backend concerns (database, authentication, storage) while React provides a rich, interactive frontend experience.
 
+

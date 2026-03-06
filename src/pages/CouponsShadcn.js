@@ -86,6 +86,8 @@ const CouponsShadcn = () => {
     currentUsageCount: 0,
     isGeneric: true,
     maxUsageLimit: 10,
+    per_user_limit: 1,
+    tray_visibility: true,
     targetedDoctorIds: [],
     targetedUserIds: [],
     usedByUserIds: [],
@@ -185,6 +187,8 @@ const CouponsShadcn = () => {
       currentUsageCount: 0,
       isGeneric: true,
       maxUsageLimit: 10,
+      per_user_limit: 1,
+      tray_visibility: true,
       targetedDoctorIds: [],
       targetedUserIds: [],
       usedByUserIds: [],
@@ -212,6 +216,8 @@ const CouponsShadcn = () => {
       currentUsageCount: coupon.currentUsageCount || 0,
       isGeneric: coupon.isGeneric !== undefined ? coupon.isGeneric : true,
       maxUsageLimit: coupon.maxUsageLimit || 10,
+      per_user_limit: coupon.per_user_limit ?? 1,
+      tray_visibility: coupon.tray_visibility !== undefined ? coupon.tray_visibility : true,
       targetedDoctorIds: coupon.targetedDoctorIds || [],
       targetedUserIds: coupon.targetedUserIds || [],
       usedByUserIds: coupon.usedByUserIds || [],
@@ -640,16 +646,33 @@ const CouponsShadcn = () => {
                     }
                   />
                 </div>
+                {formData.couponType !== "Targeted" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="maxUsageLimit">Max Usage Limit</Label>
+                    <Input
+                      id="maxUsageLimit"
+                      type="number"
+                      value={formData.maxUsageLimit}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          maxUsageLimit: parseInt(e.target.value) || 0,
+                        })
+                      }
+                      min="0"
+                    />
+                  </div>
+                )}
                 <div className="space-y-2">
-                  <Label htmlFor="maxUsageLimit">Max Usage Limit</Label>
+                  <Label htmlFor="per_user_limit">Per User Limit</Label>
                   <Input
-                    id="maxUsageLimit"
+                    id="per_user_limit"
                     type="number"
-                    value={formData.maxUsageLimit}
+                    value={formData.per_user_limit}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        maxUsageLimit: parseInt(e.target.value) || 0,
+                        per_user_limit: parseInt(e.target.value) || 0,
                       })
                     }
                     min="0"
@@ -675,6 +698,18 @@ const CouponsShadcn = () => {
                       <SelectItem value="Targeted">Targeted</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="space-y-2 flex items-center gap-3 pt-6">
+                  <Switch
+                    id="tray_visibility"
+                    checked={formData.tray_visibility}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, tray_visibility: checked })
+                    }
+                  />
+                  <Label htmlFor="tray_visibility" className="cursor-pointer">
+                    Tray Visibility
+                  </Label>
                 </div>
               </div>
             </div>
