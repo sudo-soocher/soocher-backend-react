@@ -710,6 +710,8 @@ class ConsultationService {
       status: status,
       statusColor: getStatusColor(status),
       category: this.categorizeConsultation(consultation),
+      booking_type: consultation.booking_type || "app", // Default to app if not specified
+      meetLink: consultation.extras?.meetLink || null,
       duration:
         consultation.actualStartTime && consultation.actualEndTime
           ? Math.round(
