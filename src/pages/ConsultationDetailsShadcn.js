@@ -536,7 +536,66 @@ const ConsultationDetailsShadcn = () => {
                       </span>
                     </div>
                   </div>
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                      Booking Source
+                    </p>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="outline" className={(consultation.meetLink ? "web" : consultation.booking_type) === "web" ? "bg-amber-50 text-amber-700 border-amber-200" : "bg-emerald-50 text-emerald-700 border-emerald-200"}>
+                        {(consultation.meetLink ? "web" : consultation.booking_type)?.toUpperCase() || "APP"}
+                      </Badge>
+                    </div>
+                  </div>
                 </div>
+
+                {consultation.meetLink && (
+                  <div className="mt-6 p-4 bg-emerald-50 rounded-lg border border-emerald-100">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 bg-emerald-100 rounded-lg">
+                          <Video className="h-5 w-5 text-emerald-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wide">
+                            Google Meet Link
+                          </p>
+                          <a
+                            href={consultation.meetLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm font-medium text-emerald-700 hover:underline flex items-center gap-1"
+                          >
+                            {consultation.meetLink}
+                            <ExternalLink size={12} />
+                          </a>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100"
+                        onClick={() => {
+                          navigator.clipboard.writeText(consultation.meetLink);
+                          setCopiedId(`meet-${consultation.consultationId}`);
+                          setTimeout(() => setCopiedId(null), 2000);
+                        }}
+                      >
+                        {copiedId === `meet-${consultation.consultationId}` ? (
+                          <>
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Copied Link
+                          </>
+                        ) : (
+                          <>
+                            <Video className="h-4 w-4 mr-1" />
+                            <Copy className="h-4 w-4 mr-2" />
+                            Copy Link
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 

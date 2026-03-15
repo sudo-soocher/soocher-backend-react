@@ -68,6 +68,7 @@ const ConsultationsShadcn = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [sourceFilter, setSourceFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [lastDoc, setLastDoc] = useState(null);
@@ -104,9 +105,15 @@ const ConsultationsShadcn = () => {
     { value: "cancelled", label: "Cancelled", count: 0 },
   ];
 
+  const sourceOptions = [
+    { value: "all", label: "All Sources" },
+    { value: "app", label: "App" },
+    { value: "web", label: "Web" },
+  ];
+
   useEffect(() => {
     fetchConsultations();
-  }, [statusFilter, selectedDate]);
+  }, [statusFilter, sourceFilter, selectedDate]);
 
   const fetchConsultations = async (loadMore = false) => {
     try {
@@ -130,6 +137,15 @@ const ConsultationsShadcn = () => {
         filteredConsultations = formattedConsultations.filter(
           (consultation) => {
             return consultation.category === statusFilter;
+          }
+        );
+      }
+
+      if (sourceFilter !== "all") {
+        filteredConsultations = filteredConsultations.filter(
+          (consultation) => {
+            const currentSource = (consultation.meetLink ? "web" : consultation.booking_type) === "web" ? "web" : "app";
+            return currentSource === sourceFilter;
           }
         );
       }
@@ -341,6 +357,16 @@ const ConsultationsShadcn = () => {
               ))}
             </SelectContent>
           </Select>
+          <Select value={sourceFilter} onValueChange={setSourceFilter}>
+            <SelectTrigger style={{ width: 120, height: 36, borderRadius: 9, border: "1.5px solid #bfdbfe", background: "white", fontSize: 12.5, fontFamily: "Inter,sans-serif" }}>
+              <SelectValue placeholder="Source" />
+            </SelectTrigger>
+            <SelectContent>
+              {sourceOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -368,7 +394,7 @@ const ConsultationsShadcn = () => {
             <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 900 }}>
               <thead>
                 <tr style={{ background: "#f8fbff", borderBottom: "1.5px solid #e0f2fe" }}>
-                  {["Consultation ID", "Patient", "Doctor", "Scheduled Time", "Duration", "Type", "Status", "Actions"].map(h => (
+                  {["Consultation ID", "Patient", "Doctor", "Scheduled Time", "Duration", "Type", "Source", "Status", "Meet", "Actions"].map(h => (
                     <th key={h} style={{ padding: "11px 14px", fontSize: 10.5, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.5px", textAlign: "left", whiteSpace: "nowrap" }}>{h}</th>
                   ))}
                 </tr>
@@ -423,10 +449,33 @@ const ConsultationsShadcn = () => {
                       </div>
                     </td>
                     <td style={{ padding: "12px 14px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "2px 6px", borderRadius: 4, background: (consultation.meetLink ? "web" : consultation.booking_type) === "web" ? "#fef3c7" : "#dcfce7", width: "fit-content" }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: (consultation.meetLink ? "web" : consultation.booking_type) === "web" ? "#92400e" : "#166534", textTransform: "uppercase" }}>{(consultation.meetLink ? "web" : consultation.booking_type) || "APP"}</span>
+                      </div>
+                    </td>
+                    <td style={{ padding: "12px 14px" }}>
                       <Badge variant={getStatusBadgeVariant(consultation.status)} className="flex items-center space-x-1 px-2 py-0.5" style={{ width: "max-content", fontSize: 11 }}>
                         {getStatusIcon(consultation.status)}
                         <span className="font-medium">{consultation.status}</span>
                       </Badge>
+                    </td>
+                    <td style={{ padding: "12px 14px" }}>
+                      {consultation.meetLink ? (
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(consultation.meetLink);
+                            setCopiedId(`meet-${consultation.id}`);
+                            setTimeout(() => setCopiedId(null), 2000);
+                          }}
+                          style={{ padding: "4px 8px", borderRadius: 6, border: "1px solid #d1fae5", background: "#f0fdf4", color: "#059669", fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", gap: 4, cursor: "pointer", textDecoration: "none" }}
+                          onMouseEnter={e => { e.currentTarget.style.background = "#dcfce7"; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = "#f0fdf4"; }}
+                        >
+                          {copiedId === `meet-${consultation.id}` ? <CheckCircle size={12} /> : <Copy size={12} />} {copiedId === `meet-${consultation.id}` ? "Copied" : <><Video size={12} /> Copy</>}
+                        </button>
+                      ) : (
+                        <span style={{ fontSize: 11, color: "#94a3b8" }}>-</span>
+                      )}
                     </td>
                     <td style={{ padding: "12px 14px" }}>
                       <div style={{ display: "flex", gap: 6 }}>
