@@ -11,11 +11,15 @@ import {
   Loader2,
   CheckCircle2,
   AlertCircle,
+  Search,
+  Check,
+  X,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
+import { Checkbox } from "../components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -28,7 +32,14 @@ import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Badge } from "../components/ui/badge";
 import LoadingSpinner from "../components/common/LoadingSpinner";
-import { sendNotificationToAll, getNotificationHistory, saveNotificationToFirestore } from "../services/notificationService";
+import { 
+  sendNotificationToAll, 
+  getNotificationHistory, 
+  saveNotificationToFirestore,
+  sendNotificationToUserIds 
+} from "../services/notificationService";
+import { getPatients } from "../services/patientService";
+import { getDoctors } from "../services/doctorService";
 import { cn } from "../lib/utils";
 
 const NotificationsShadcn = () => {
@@ -41,11 +52,49 @@ const NotificationsShadcn = () => {
   const [notificationHistory, setNotificationHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
+  // Targeted notification state
+  const [targetData, setTargetData] = useState([]);
+  const [selectedTargetIds, setSelectedTargetIds] = useState([]);
+  const [isLoadingTargets, setIsLoadingTargets] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
   useEffect(() => {
     if (activeTab === "history") {
       loadNotificationHistory();
     }
   }, [activeTab]);
+
+  useEffect(() => {
+    if (target === "specific_users" || target === "specific_doctors") {
+      loadTargetData();
+    } else {
+      setTargetData([]);
+      setSelectedTargetIds([]);
+    }
+  }, [target]);
+
+  const loadTargetData = async () => {
+    setIsLoadingTargets(true);
+    try {
+      let result;
+      if (target === "specific_users") {
+        result = await getPatients();
+      } else {
+        result = await getDoctors();
+      }
+
+      if (result.success) {
+        setTargetData(result.data || []);
+      } else {
+        showToast("Error", `Failed to load ${target === "specific_users" ? 'patients' : 'doctors'}`, "destructive");
+      }
+    } catch (error) {
+      console.error("Error loading target data:", error);
+      showToast("Error", "An unexpected error occurred while loading recipients", "destructive");
+    } finally {
+      setIsLoadingTargets(false);
+    }
+  };
 
   const loadNotificationHistory = async () => {
     setLoadingHistory(true);
@@ -93,7 +142,17 @@ const NotificationsShadcn = () => {
       }
 
       // Send notification via Cloud Function
-      const result = await sendNotificationToAll(title.trim(), message.trim(), target);
+      let result;
+      if (target === "specific_users" || target === "specific_doctors") {
+        if (selectedTargetIds.length === 0) {
+          showToast("Validation Error", "Please select at least one recipient", "destructive");
+          setIsSending(false);
+          return;
+        }
+        result = await sendNotificationToUserIds(selectedTargetIds, title.trim(), message.trim());
+      } else {
+        result = await sendNotificationToAll(title.trim(), message.trim(), target);
+      }
 
       if (result.success) {
         // Update notification status to sent
@@ -148,8 +207,10 @@ const NotificationsShadcn = () => {
   const getTargetIcon = (targetValue) => {
     switch (targetValue) {
       case "doctors":
+      case "specific_doctors":
         return <UserCheck className="h-4 w-4" />;
       case "patients":
+      case "specific_users":
         return <User className="h-4 w-4" />;
       default:
         return <Users className="h-4 w-4" />;
@@ -162,9 +223,37 @@ const NotificationsShadcn = () => {
         return "Doctors";
       case "patients":
         return "Patients";
+      case "specific_users":
+        return "Specific Users";
+      case "specific_doctors":
+        return "Specific Doctors";
       default:
         return "All Users";
     }
+  };
+
+  const toggleSelect = (id) => {
+    setSelectedTargetIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const filteredTargetData = targetData.filter(item => {
+    const name = item.name || "";
+    const email = item.email || "";
+    const phone = item.phoneNumber || item.whatsappNumber || "";
+    const query = searchQuery.toLowerCase();
+    return name.toLowerCase().includes(query) || 
+           email.toLowerCase().includes(query) || 
+           phone.includes(query);
+  });
+
+  const selectAll = () => {
+    setSelectedTargetIds(filteredTargetData.map(item => item.uid || item.id));
+  };
+
+  const deselectAll = () => {
+    setSelectedTargetIds([]);
   };
 
   const formatDate = (timestamp) => {
@@ -264,14 +353,109 @@ const NotificationsShadcn = () => {
                     <SelectItem value="patients">
                       <div className="flex items-center space-x-2"><User size={14} /><span>Patients Only</span></div>
                     </SelectItem>
+                    <SelectItem value="specific_users">
+                      <div className="flex items-center space-x-2"><User size={14} /><span>Specific Users</span></div>
+                    </SelectItem>
+                    <SelectItem value="specific_doctors">
+                      <div className="flex items-center space-x-2"><UserCheck size={14} /><span>Specific Doctors</span></div>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <p style={{ fontSize: 11.5, color: "#94a3b8", margin: 0 }}>
                   {target === "all" && "Send to all doctors and patients"}
                   {target === "doctors" && "Send to all doctors only"}
                   {target === "patients" && "Send to all patients only"}
+                  {target === "specific_users" && "Select specific users to receive this notification"}
+                  {target === "specific_doctors" && "Select specific doctors to receive this notification"}
                 </p>
               </div>
+
+              {/* Recipient Selection List for Specific Targets */}
+              {(target === "specific_users" || target === "specific_doctors") && (
+                <div className="space-y-3 mt-4 p-4 border rounded-lg bg-slate-50">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-semibold">
+                      Select {target === "specific_users" ? "Users" : "Doctors"} ({selectedTargetIds.length} selected)
+                    </Label>
+                    <div className="flex space-x-2">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={selectAll}
+                        className="h-7 text-xs"
+                      >
+                        Select All
+                      </Button>
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={deselectAll}
+                        className="h-7 text-xs"
+                      >
+                        Deselect All
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  {/* Search Input */}
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder={`Search ${target === "specific_users" ? "users" : "doctors"}...`}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-9 h-9"
+                    />
+                  </div>
+
+                  {/* Scrollable List */}
+                  <div className="max-h-60 overflow-y-auto border rounded-md bg-white">
+                    {isLoadingTargets ? (
+                      <div className="flex items-center justify-center p-8">
+                        <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+                      </div>
+                    ) : filteredTargetData.length === 0 ? (
+                      <div className="p-8 text-center text-sm text-gray-500">
+                        No {target === "specific_users" ? "users" : "doctors"} found matching your search.
+                      </div>
+                    ) : (
+                      <div className="divide-y">
+                        {filteredTargetData.map((item) => {
+                          const id = item.uid || item.id;
+                          const isSelected = selectedTargetIds.includes(id);
+                          return (
+                            <div 
+                              key={id}
+                              className={cn(
+                                "flex items-center space-x-3 p-3 hover:bg-slate-50 cursor-pointer transition-colors",
+                                isSelected && "bg-blue-50/50"
+                              )}
+                              onClick={() => toggleSelect(id)}
+                            >
+                              <Checkbox 
+                                checked={isSelected}
+                                onCheckedChange={() => toggleSelect(id)}
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 truncate">
+                                  {item.name || "Unnamed User"}
+                                </p>
+                                <p className="text-xs text-gray-500 truncate">
+                                  {item.email || item.phoneNumber || item.whatsappNumber || "No contact info"}
+                                </p>
+                              </div>
+                              {isSelected && <Check className="h-4 w-4 text-blue-600" />}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Title */}
               <div className="space-y-2">

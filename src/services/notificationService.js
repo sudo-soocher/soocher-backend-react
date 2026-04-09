@@ -360,3 +360,46 @@ export const sendNotificationToUserIds = async (userIds, title, message, data = 
     };
   }
 };
+
+/**
+ * Common function to send any type of notification
+ * @param {object} data - Notification data
+ * @param {string} data.notificationType - 'booking_confirmed', 'booking_cancelled', 'booking_rescheduled', or 'custom'
+ * @param {string} [data.patientId] - Patient User ID
+ * @param {string} [data.doctorId] - Doctor User ID
+ * @param {Array<string>} [data.userIds] - Additional User IDs
+ * @param {string} [data.title] - Custom title (required if notificationType is 'custom')
+ * @param {string} [data.body] - Custom body (required if notificationType is 'custom')
+ * @param {number} [data.consultationTime] - Consultation time in epoch millis
+ * @param {string} [data.consultationId] - Consultation ID
+ * @param {string} [data.patientName] - Patient name for templates
+ * @param {string} [data.doctorName] - Doctor name for templates
+ * @param {object} [data.additionalData] - Extra data payload
+ */
+export const sendNotification = async (data) => {
+  try {
+    const cloudFunctionUrl = "https://asia-southeast1-soocherv2.cloudfunctions.net/sendNotification";
+    
+    const response = await fetch(cloudFunctionUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(errorData.error || `Cloud Function failed: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error calling sendNotification:", error);
+    return {
+      success: false,
+      error: error.message || "Failed to send notification",
+    };
+  }
+};

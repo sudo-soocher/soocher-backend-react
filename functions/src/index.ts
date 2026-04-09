@@ -453,3 +453,125 @@ export const sendBookingNotifications = functions.https.onRequest(
     }
   }
 );
+
+/**
+ * Flexible Common Cloud Function to send various notifications
+ * Supports predefined types: booking_confirmed, booking_cancelled, ...
+ */
+/**
+ * Flexible Common Cloud Function to send various notifications
+ */
+export const sendNotification = functions.https.onRequest(
+  {region: "asia-southeast1", cors: true},
+  async (req: any, res: any) => {
+    try {
+      const {
+        notificationType = "custom",
+        patientId, doctorId, userIds = [],
+        title, body, patientName, doctorName,
+        consultationTime, consultationId,
+        additionalData = {},
+      } = req.body;
+
+      if (!patientId && !doctorId && (!userIds || userIds.length === 0)) {
+        res.status(400).json({error: "At least one recipient is required"});
+        return;
+      }
+
+      const db = admin.firestore();
+      let pTitle = title;
+      let pBody = body;
+      let dTitle = title;
+      let dBody = body;
+
+      if (consultationTime) {
+        const d = new Date(consultationTime);
+        const dStr = d.toLocaleDateString("en-US", {
+          weekday: "short", month: "short", day: "numeric", year: "numeric",
+        });
+        const tStr = d.toLocaleTimeString("en-US", {
+          hour: "numeric", minute: "2-digit", hour12: true,
+        });
+
+        if (notificationType === "booking_confirmed") {
+          pTitle = "Appointment Confirmed";
+          pBody = `Your appointment with Dr. ${doctorName || "your doctor"}` +
+            ` on ${dStr} at ${tStr} is confirmed.`;
+          dTitle = "New Appointment";
+          dBody = `New appointment booked with ${patientName || "a patient"}` +
+            ` on ${dStr} at ${tStr}.`;
+        } else if (notificationType === "booking_cancelled") {
+          pTitle = "Appointment Cancelled";
+          pBody = `Your appointment with Dr. ${doctorName || "your doctor"}` +
+            ` on ${dStr} at ${tStr} has been cancelled.`;
+          dTitle = "Appointment Cancelled";
+          dBody = `Appointment with ${patientName || "a patient"}` +
+            ` on ${dStr} at ${tStr} has been cancelled.`;
+        } else if (notificationType === "booking_rescheduled") {
+          pTitle = "Appointment Rescheduled";
+          pBody = `Your appointment with Dr. ${doctorName || "your doctor"}` +
+            ` has been rescheduled to ${dStr} at ${tStr}.`;
+          dTitle = "Appointment Rescheduled";
+          dBody = `Appointment with ${patientName || "a patient"}` +
+            ` has been rescheduled to ${dStr} at ${tStr}.`;
+        }
+      }
+
+      if (!pTitle || !pBody) {
+        if (notificationType === "custom") {
+          res.status(400).json({error: "Title and body are required"});
+          return;
+        }
+      }
+
+      const results = {successCount: 0, failureCount: 0, details: [] as any[]};
+
+      const sendToUser = async (uid: string, t: string, b: string) => {
+        try {
+          const userDoc = await db.collection("Users").doc(uid).get();
+          const fcmToken = userDoc.data()?.fcmToken;
+          if (fcmToken && fcmToken.trim() !== "") {
+            await admin.messaging().send({
+              notification: {title: t, body: b},
+              data: {
+                ...additionalData,
+                notificationType,
+                consultationId: consultationId || "",
+                consultationTime: consultationTime ?
+                  String(consultationTime) : "",
+              },
+              token: fcmToken,
+            });
+            results.successCount++;
+            results.details.push({uid, success: true});
+          } else {
+            results.failureCount++;
+            results.details.push({uid, success: false, error: "No FCM token"});
+          }
+        } catch (err: unknown) {
+          results.failureCount++;
+          const msg = err instanceof Error ? err.message : "FCM Error";
+          results.details.push({uid, success: false, error: msg});
+        }
+      };
+
+      if (patientId) await sendToUser(patientId, pTitle, pBody);
+      if (doctorId) await sendToUser(doctorId, dTitle, dBody);
+
+      for (const uid of userIds) {
+        if (uid !== patientId && uid !== doctorId) {
+          await sendToUser(uid, title || pTitle, body || pBody);
+        }
+      }
+
+      res.status(200).json({
+        success: results.successCount > 0,
+        message: `Processed ${results.successCount + results.failureCount}`,
+        results,
+      });
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : "Internal Error";
+      res.status(500).json({error: msg});
+    }
+  }
+);
