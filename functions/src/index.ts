@@ -20,17 +20,9 @@ admin.initializeApp();
  * Supports targeting: 'all', 'doctors', or 'patients'
  */
 export const sendNotificationToAll = functions.https.onRequest(
-  async (req, res) => {
-    // CORS handling
-    res.set("Access-Control-Allow-Origin", "*");
-    res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
-    res.set("Access-Control-Allow-Headers", "Content-Type");
-
-    if (req.method === "OPTIONS") {
-      res.status(204).send("");
-      return;
-    }
-
+  {region: "asia-southeast1", cors: true},
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async (req: any, res: any) => {
     if (req.method !== "POST") {
       res.status(405).json({error: "Method not allowed"});
       return;
@@ -179,17 +171,9 @@ export const sendNotificationToAll = functions.https.onRequest(
  * Fetches FCM tokens from Users collection and sends notifications
  */
 export const sendNotificationToUserIds = functions.https.onRequest(
-  async (req, res) => {
-    // CORS handling
-    res.set("Access-Control-Allow-Origin", "*");
-    res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
-    res.set("Access-Control-Allow-Headers", "Content-Type");
-
-    if (req.method === "OPTIONS") {
-      res.status(204).send("");
-      return;
-    }
-
+  {region: "asia-southeast1", cors: true},
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async (req: any, res: any) => {
     if (req.method !== "POST") {
       res.status(405).json({error: "Method not allowed"});
       return;
@@ -306,17 +290,9 @@ export const sendNotificationToUserIds = functions.https.onRequest(
  * Sends personalized notifications to both patient and doctor
  */
 export const sendBookingNotifications = functions.https.onRequest(
-  async (req, res) => {
-    // CORS handling
-    res.set("Access-Control-Allow-Origin", "*");
-    res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
-    res.set("Access-Control-Allow-Headers", "Content-Type");
-
-    if (req.method === "OPTIONS") {
-      res.status(204).send("");
-      return;
-    }
-
+  {region: "asia-southeast1", cors: true},
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async (req: any, res: any) => {
     if (req.method !== "POST") {
       res.status(405).json({error: "Method not allowed"});
       return;
@@ -463,6 +439,7 @@ export const sendBookingNotifications = functions.https.onRequest(
  */
 export const sendNotification = functions.https.onRequest(
   {region: "asia-southeast1", cors: true},
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async (req: any, res: any) => {
     try {
       const {
