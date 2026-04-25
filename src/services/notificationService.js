@@ -33,8 +33,11 @@ export const sendNotificationToAll = async (title, message, target = 'all', data
         data,
       }),
     }).catch((fetchError) => {
-      // Handle network errors (Cloud Function not deployed, CORS, etc.)
-      console.error("Network error calling Cloud Function:", fetchError);
+      console.error("--- NOTIFICATION ALL DEBUG START ---");
+      console.error("URL:", cloudFunctionUrl);
+      console.error("Payload:", { title, message, target, data });
+      console.error("Error Message:", fetchError.message);
+      console.error("--- NOTIFICATION ALL DEBUG END ---");
       throw new Error(
         `Failed to connect to Cloud Function. Please ensure the function 'sendNotificationToAll' is deployed. ` +
         `Error: ${fetchError.message || 'Network request failed'}`
@@ -243,7 +246,10 @@ export const sendBookingNotifications = async (bookingData) => {
         success: false,
         error: "patientId, doctorId, and consultationTime are required",
       };
-    }    const cloudFunctionUrl = "https://sendbookingnotifications-shl5yc2qhq-uc.a.run.app";    const response = await fetch(cloudFunctionUrl, {
+    }
+    
+    const cloudFunctionUrl = "https://asia-southeast1-soocherv2.cloudfunctions.net/sendBookingNotifications";
+    const response = await fetch(cloudFunctionUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -313,7 +319,7 @@ export const sendNotificationToUserIds = async (userIds, title, message, data = 
       };
     }
 
-    const cloudFunctionUrl = "https://sendnotificationtouserids-shl5yc2qhq-uc.a.run.app";
+    const cloudFunctionUrl = "https://asia-southeast1-soocherv2.cloudfunctions.net/sendNotificationToUserIds";
 
     const response = await fetch(cloudFunctionUrl, {
       method: "POST",
@@ -327,7 +333,12 @@ export const sendNotificationToUserIds = async (userIds, title, message, data = 
         data,
       }),
     }).catch((fetchError) => {
-      console.error("Network error calling sendNotificationToUserIds:", fetchError);
+      console.error("--- NOTIFICATION DEBUG START ---");
+      console.error("URL:", cloudFunctionUrl);
+      console.error("Payload:", { userIds, title, message, data });
+      console.error("Error Message:", fetchError.message);
+      console.error("Error Stack:", fetchError.stack);
+      console.error("--- NOTIFICATION DEBUG END ---");
       throw new Error(
         `Failed to connect to Cloud Function. Error: ${fetchError.message || 'Network request failed'}`
       );

@@ -422,23 +422,23 @@ const NotificationsShadcn = () => {
                       </div>
                     ) : (
                       <div className="divide-y">
-                        {filteredTargetData.map((item) => {
-                          const id = item.uid || item.id;
+                        {filteredTargetData.map((item, index) => {
+                          const id = item.uid || item.id || `item-${index}`;
                           const isSelected = selectedTargetIds.includes(id);
                           return (
-                            <div 
+                            <label 
                               key={id}
                               className={cn(
-                                "flex items-center space-x-3 p-3 hover:bg-slate-50 cursor-pointer transition-colors",
+                                "flex items-center space-x-3 p-3 hover:bg-slate-50 cursor-pointer transition-colors border-b last:border-b-0 select-none",
                                 isSelected && "bg-blue-50/50"
                               )}
-                              onClick={() => toggleSelect(id)}
                             >
-                              <Checkbox 
-                                checked={isSelected}
-                                onCheckedChange={() => toggleSelect(id)}
-                                onClick={(e) => e.stopPropagation()}
-                              />
+                              <div className="flex-shrink-0">
+                                <Checkbox 
+                                  checked={isSelected}
+                                  onCheckedChange={() => toggleSelect(id)}
+                                />
+                              </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium text-gray-900 truncate">
                                   {item.name || "Unnamed User"}
@@ -447,8 +447,8 @@ const NotificationsShadcn = () => {
                                   {item.email || item.phoneNumber || item.whatsappNumber || "No contact info"}
                                 </p>
                               </div>
-                              {isSelected && <Check className="h-4 w-4 text-blue-600" />}
-                            </div>
+                              {isSelected && <Check className="h-4 w-4 text-blue-600 flex-shrink-0" />}
+                            </label>
                           );
                         })}
                       </div>
